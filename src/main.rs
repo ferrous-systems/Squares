@@ -21,15 +21,17 @@ const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
 
 //creates a grid with ncells*ncells initialized with black cells
-fn life_random(ncells: i32) -> Vec<Vec<bool>> {
+fn grid_init(ncells: i32) -> Vec<Vec<Vec<u8>>> {
     let mut rng = rand::thread_rng();
 
-    let mut v:Vec<Vec<bool>> = Vec::new();
+    let mut v:Vec<Vec<Vec<u8>>> = Vec::new();
+
+    let color_vec = vec![0, 0, 0];
 
     for i in 0..ncells {
         v.push(Vec::new());
         for j in 0..ncells {
-            v[i as usize].push(true);
+            v[i as usize].push(vec![0, 0, 0]);
         }
     }
     v
@@ -43,89 +45,68 @@ fn random_rgb () -> u8 {
 
 
 //converts row column values into xy pixels and draws rectangle
-fn display_cell(renderer: &mut Renderer, row: i32, col: i32) {
+fn display_cell(renderer: &mut Renderer, row: i32, col: i32, v: &Vec<Vec<Vec<u8>>>) {
 
     let mut x = CELL_WIDTH * col;
     let mut y = CELL_WIDTH * row;
 
-    let cell_color = Color::RGB(random_rgb(), random_rgb(), random_rgb());
+    let cell_color = Color::RGB(v[row as usize][col as usize][0],
+                                v[row as usize][col as usize][1],
+                                v[row as usize][col as usize][2]);
+
     renderer.set_draw_color(cell_color);
     renderer.fill_rect(Rect::new(x, y,
                         CELL_WIDTH as u32,
                         CELL_HEIGHT as u32));
 }
 //displays the whole grid by repeatedly calling display_cell on the alive cells
-fn display_frame(r: &mut Renderer, v: &Vec<Vec<bool>>) {
+fn display_frame(r: &mut Renderer, v: &Vec<Vec<Vec<u8>>>) {
     r.set_draw_color(Color::RGB(200, 200, 200));
     r.clear();
     for i in 0..NCELLS {
         for j in 0..NCELLS {
-            if v[i as usize][j as usize] {
-                display_cell(r, i, j)
-            }
+            display_cell(r, i, j, v)
+            //if v[i as usize][j as usize] {
+            //    display_cell(r, i, j)
+            //}
         }
     }
     r.present();
 }
-
-// fn dead_or_alive(r: i32, c: i32, v: &Vec<Vec<bool>>) -> bool {
+// //checks old color
+// fn new_color(r: i32, c: i32, v: &Vec<Vec<Vec<u8>>>) -> u8 {
 //
 //     let n = count_surrounding(r, c, v);
-//     let curr = v[r as usize][c as usize] as i32;
 //
-//     match (curr, n) {
-//         (1, 0...1) => false,
-//         (1, 4...8) => false,
-//         (1, 2...3) => true,
-//         (0, 3)     => true,
-//         (0, 0...2) => false,
-//         (0, 4...8) => false,
-//         _ => panic!("alive: error in match"),
-//     }
-// }
-//
-// fn count_surrounding ( r: i32, c: i32, v: &Vec<Vec<bool>>) -> i32 {
-//     let r = r as usize;
-//     let c = c as usize;
-//
-//     v[dec(r)][c] as i32 +
-//     v[inc(r)][c] as i32 +
-//     v[r][dec(c)] as i32 +
-//     v[r][inc(c)] as i32 +
-//     v[dec(r)][dec(c)] as i32 +
-//     v[dec(r)][inc(c)] as i32 +
-//     v[inc(r)][inc(c)] as i32 +
-//     v[inc(r)][dec(c)] as i32
-// }
-//
-// fn inc(n: usize) -> usize {
-//     (n + 1) % (NCELLS as usize)
-// }
-//
-// fn dec(n: usize) -> usize {
-//     if n == 0 {
-//         (NCELLS - 1 ) as usize
-//     } else {
-//         (n - 1) as usize
-//     }
-// }
-//
-// fn life_next(v: Vec<Vec<bool>>) -> Vec<Vec<bool>> {
-//     let mut v2:Vec<Vec<bool>> = Vec::new();
-//
-//     for i in 0..NCELLS {
-//         v2.push(Vec::new());
-//         for j in 0..NCELLS {
-//             if dead_or_alive(i, j, &v) {
-//                 v2[i as usize].push(true);
-//             } else {
-//                 v2[i as usize].push(false);
-//             }
-//         }
+//     for i in v[r as usize][c as usize] {
+//         println!("{}", i);
 //     }
 //
-//     v2
+//
+//
+//
+//
 // }
+
+
+fn next_color(v: Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+    let mut v2:Vec<Vec<Vec<u8>>> = Vec::new();
+
+    for i in 0..NCELLS {
+        v2.push(Vec::new());
+        for j in 0..NCELLS {
+
+            //checks old color
+            let rgb = vec![random_rgb(), random_rgb(), random_rgb()];
+            v2[i as usize].push(rgb);
+            // } else {
+            //     v2[i as usize].push(false);
+            // }
+        };
+    }
+
+    v2
+}
 
 fn init<'a>()-> (Renderer<'a>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
@@ -151,7 +132,7 @@ fn init<'a>()-> (Renderer<'a>, EventPump) {
 fn main() {
 
     let (mut r, mut e) = init(); //better names then r and e?
-    let mut v = life_random(NCELLS);
+    let mut v = grid_init(NCELLS);
 
     'running:loop {
         for event in e.poll_iter() { //e is former event_pump
@@ -165,7 +146,7 @@ fn main() {
         }
 
         display_frame(&mut r, &v);
-        // v = life_next(v);
+        v = next_color(v);
         println!("{:?}", v);
         thread::sleep(time::Duration::from_millis(50));
     }
