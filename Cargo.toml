@@ -1,0 +1,9 @@
+[package]
+name = "squares"
+version = "0.1.0"
+authors = ["Mirabellensaft <tanks@ferrous-systems.com>"]
+edition = "2018"
+
+[dependencies]
+sdl2 = "0.23.0"
+rand = "0.3.14"
