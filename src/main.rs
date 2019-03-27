@@ -15,26 +15,27 @@ use sdl2::EventPump;
 //constants
 const MAX_X: i32 = 599;
 const MAX_Y: i32 = MAX_X;
-const CELL_WIDTH: i32 = 20;
+const CELL_WIDTH: i32 = 40;
 const CELL_HEIGHT: i32 = CELL_WIDTH;
 const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
 
 //creates a grid with ncells*ncells initialized with black cells
 fn grid_init(ncells: i32) -> Vec<Vec<Vec<u8>>> {
-    let mut rng = rand::thread_rng();
+    //let mut rng = rand::thread_rng();
 
-    let mut v:Vec<Vec<Vec<u8>>> = Vec::new();
+    let mut grid_vector:Vec<Vec<Vec<u8>>> = Vec::new();
 
     let color_vec = vec![0, 0, 0];
 
-    for i in 0..ncells {
-        v.push(Vec::new());
-        for j in 0..ncells {
-            v[i as usize].push(vec![0, 0, 0]);
+    for row in 0..ncells {
+        grid_vector.push(Vec::new());
+        for column in 0..ncells {
+            grid_vector[row as usize].push(vec![0, 0, 0]); // why doesnt color_vec work in there?
         }
     }
-    v
+
+    grid_vector
 }
 
 fn random_rgb () -> u8 {
@@ -42,37 +43,40 @@ fn random_rgb () -> u8 {
     rng.gen_range(0, 255)
 }
 
-
-
 //converts row column values into xy pixels and draws rectangle
-fn display_cell(renderer: &mut Renderer, row: i32, col: i32, v: &Vec<Vec<Vec<u8>>>) {
+fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<Vec<Vec<u8>>>) {
 
     let mut x = CELL_WIDTH * col;
     let mut y = CELL_WIDTH * row;
 
-    let cell_color = Color::RGB(v[row as usize][col as usize][0],
-                                v[row as usize][col as usize][1],
-                                v[row as usize][col as usize][2]);
+    let cell_color = Color::RGB(grid_vector[row as usize][col as usize][0],
+                                grid_vector[row as usize][col as usize][1],
+                                grid_vector[row as usize][col as usize][2]);
 
     renderer.set_draw_color(cell_color);
     renderer.fill_rect(Rect::new(x, y,
                         CELL_WIDTH as u32,
                         CELL_HEIGHT as u32));
 }
+
+
 //displays the whole grid by repeatedly calling display_cell on the alive cells
-fn display_frame(r: &mut Renderer, v: &Vec<Vec<Vec<u8>>>) {
-    r.set_draw_color(Color::RGB(200, 200, 200));
-    r.clear();
-    for i in 0..NCELLS {
-        for j in 0..NCELLS {
-            display_cell(r, i, j, v)
+fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<Vec<u8>>>) {
+    renderer.set_draw_color(Color::RGB(200, 200, 200));
+    renderer.clear();
+    for row in 0..NCELLS {
+        for column in 0..NCELLS {
+            display_cell(renderer, row, column, grid_vector)
             //if v[i as usize][j as usize] {
             //    display_cell(r, i, j)
             //}
         }
     }
-    r.present();
+
+    renderer.present();
 }
+
+
 // //checks old color
 // fn new_color(r: i32, c: i32, v: &Vec<Vec<Vec<u8>>>) -> u8 {
 //
@@ -89,23 +93,23 @@ fn display_frame(r: &mut Renderer, v: &Vec<Vec<Vec<u8>>>) {
 // }
 
 
-fn next_color(v: Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
-    let mut v2:Vec<Vec<Vec<u8>>> = Vec::new();
-
+fn next_color(grid_vector: Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+    let mut new_grid_vector:Vec<Vec<Vec<u8>>> = Vec::new();
+    //Right now, this only creates new random colors
     for i in 0..NCELLS {
-        v2.push(Vec::new());
+        new_grid_vector.push(Vec::new());
         for j in 0..NCELLS {
 
             //checks old color
             let rgb = vec![random_rgb(), random_rgb(), random_rgb()];
-            v2[i as usize].push(rgb);
+            new_grid_vector[i as usize].push(rgb);
             // } else {
             //     v2[i as usize].push(false);
             // }
         };
     }
 
-    v2
+    new_grid_vector
 }
 
 fn init<'a>()-> (Renderer<'a>, EventPump) {
@@ -131,11 +135,11 @@ fn init<'a>()-> (Renderer<'a>, EventPump) {
 
 fn main() {
 
-    let (mut r, mut e) = init(); //better names then r and e?
-    let mut v = grid_init(NCELLS);
+    let (mut renderer, mut events) = init();
+    let mut grid_vector = grid_init(NCELLS);
 
     'running:loop {
-        for event in e.poll_iter() { //e is former event_pump
+        for event in events.poll_iter() {
             match event {
                 Event::KeyDown {
                     keycode: Some(Keycode::Escape), ..
@@ -145,11 +149,9 @@ fn main() {
             }
         }
 
-        display_frame(&mut r, &v);
-        v = next_color(v);
-        println!("{:?}", v);
+        display_frame(&mut renderer, &grid_vector);
+        grid_vector = next_color(grid_vector);
+        println!("{:?}", grid_vector);
         thread::sleep(time::Duration::from_millis(50));
     }
-
-
 }
