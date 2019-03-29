@@ -95,7 +95,14 @@ fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<[u8; 3]>>) {
 //
 //
 // }
+fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell_info: Cell) -> Vec<Vec<[u8; 3]>> {
 
+    let color_arr = [cell_info.red, cell_info.green, cell_info.blue];
+
+
+    grid_vector[cell_info.row as usize][cell_info.column as usize] = color_arr; // why doesnt color_vec work in there?
+
+    grid_vector
 
 }
 
