@@ -19,19 +19,22 @@ const CELL_WIDTH: i32 = 40;
 const CELL_HEIGHT: i32 = CELL_WIDTH;
 const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
+mod cell;
+use cell::{Cell};
 
-//creates a grid with ncells*ncells initialized with black cells
-fn grid_init(ncells: i32) -> Vec<Vec<Vec<u8>>> {
+
+//creates a grid with ncells*ncells initialized with cell in caput mortuum
+fn grid_init(ncells: i32) -> Vec<Vec<[u8; 3]>> {
     //let mut rng = rand::thread_rng();
 
-    let mut grid_vector:Vec<Vec<Vec<u8>>> = Vec::new();
+    let mut grid_vector:Vec<Vec<[u8; 3]>> = Vec::new();
 
-    let color_vec = vec![0, 0, 0];
+    let color_arr = [35_u8, 15_u8, 13_8];
 
     for row in 0..ncells {
         grid_vector.push(Vec::new());
         for column in 0..ncells {
-            grid_vector[row as usize].push(vec![0, 0, 0]); // why doesnt color_vec work in there?
+            grid_vector[row as usize].push(color_arr); // why doesnt color_vec work in there?
         }
     }
 
@@ -44,10 +47,11 @@ fn random_rgb () -> u8 {
 }
 
 //converts row column values into xy pixels and draws rectangle
-fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<Vec<Vec<u8>>>) {
+fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<Vec<[u8; 3]>>) {
 
     let mut x = CELL_WIDTH * col;
     let mut y = CELL_WIDTH * row;
+    println!("{}", row);
 
     let cell_color = Color::RGB(grid_vector[row as usize][col as usize][0],
                                 grid_vector[row as usize][col as usize][1],
@@ -61,7 +65,7 @@ fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<V
 
 
 //displays the whole grid by repeatedly calling display_cell on the alive cells
-fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<Vec<u8>>>) {
+fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<[u8; 3]>>) {
     renderer.set_draw_color(Color::RGB(200, 200, 200));
     renderer.clear();
     for row in 0..NCELLS {
@@ -93,15 +97,18 @@ fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<Vec<u8>>>) {
 // }
 
 
-fn next_color(grid_vector: Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
-    let mut new_grid_vector:Vec<Vec<Vec<u8>>> = Vec::new();
+}
+
+
+fn next_color_is_random(grid_vector: Vec<Vec<[u8; 3]>>) -> Vec<Vec<[u8; 3]>> {
+    let mut new_grid_vector:Vec<Vec<[u8; 3]>> = Vec::new();
     //Right now, this only creates new random colors
     for i in 0..NCELLS {
         new_grid_vector.push(Vec::new());
         for j in 0..NCELLS {
 
             //checks old color
-            let rgb = vec![random_rgb(), random_rgb(), random_rgb()];
+            let rgb = [random_rgb(), random_rgb(), random_rgb()];
             new_grid_vector[i as usize].push(rgb);
             // } else {
             //     v2[i as usize].push(false);
@@ -150,8 +157,8 @@ fn main() {
         }
 
         display_frame(&mut renderer, &grid_vector);
-        grid_vector = next_color(grid_vector);
-        println!("{:?}", grid_vector);
+        grid_vector = next_color_is_random(grid_vector);
+
         thread::sleep(time::Duration::from_millis(50));
     }
 }
