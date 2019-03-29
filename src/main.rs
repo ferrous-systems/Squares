@@ -1,9 +1,20 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
 extern crate sdl2;
 extern crate rand;
 
 use std::{thread, time};
 
 use rand::Rng;
+
+#[macro_use] extern crate rocket;
+
+
+#[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
+
+use rocket_contrib::json::{Json, JsonValue};
+
 
 use sdl2::pixels::Color;
 use sdl2::rect::{Rect};
@@ -23,7 +34,7 @@ mod cell;
 use cell::{Cell};
 
 
-//creates a grid with ncells*ncells initialized with cell in caput mortuum
+//creates a grid with ncells*ncells initialized with cell in a color
 fn grid_init(ncells: i32) -> Vec<Vec<[u8; 3]>> {
     //let mut rng = rand::thread_rng();
 
@@ -34,19 +45,20 @@ fn grid_init(ncells: i32) -> Vec<Vec<[u8; 3]>> {
     for row in 0..ncells {
         grid_vector.push(Vec::new());
         for column in 0..ncells {
-            grid_vector[row as usize].push(color_arr); // why doesnt color_vec work in there?
+            grid_vector[row as usize].push(color_arr);
         }
     }
 
     grid_vector
 }
 
+
 fn random_rgb () -> u8 {
     let mut rng = rand::thread_rng();
     rng.gen_range(0, 255)
 }
 
-//converts row column values into xy pixels and draws rectangle
+//converts row column values into xy pixels and draws rectangle in the specified color
 fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<Vec<[u8; 3]>>) {
 
     let mut x = CELL_WIDTH * col;
@@ -80,27 +92,26 @@ fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<[u8; 3]>>) {
     renderer.present();
 }
 
-
-// //checks old color
-// fn new_color(r: i32, c: i32, v: &Vec<Vec<Vec<u8>>>) -> u8 {
-//
-//     let n = count_surrounding(r, c, v);
-//
-//     for i in v[r as usize][c as usize] {
-//         println!("{}", i);
-//     }
-//
-//
-//
-//
-//
+// let cell_data = Cell {
+//     row: cell.row,
+//     column: cell.column,
+//     red: cell.red,
+//     green: cell.green,
+//     blue: cell.blue
 // }
-fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell_info: Cell) -> Vec<Vec<[u8; 3]>> {
 
-    let color_arr = [cell_info.red, cell_info.green, cell_info.blue];
+//get cell information via http
+#[post("/", data = "<cell>")]
+fn create(cell: Json<Cell>) -> Json<Cell> {
+
+    cell
+}
 
 
-    grid_vector[cell_info.row as usize][cell_info.column as usize] = color_arr; // why doesnt color_vec work in there?
+fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell: Json<Cell>) -> Vec<Vec<[u8; 3]>> {
+
+    let color_arr = [cell.red, cell.green, cell.blue];
+    grid_vector[cell.row as usize][cell.column as usize] = color_arr;
 
     grid_vector
 
@@ -137,6 +148,7 @@ fn init<'a>()-> (Renderer<'a>, EventPump) {
         .unwrap();
 
     let mut renderer = window.renderer().build().unwrap();
+
     let event_pump = sdl_context.event_pump().unwrap();
 
     renderer.set_draw_color(Color::RGB(0, 0, 0)); //color does not change since being declared here!
@@ -144,7 +156,6 @@ fn init<'a>()-> (Renderer<'a>, EventPump) {
     renderer.present();
 
     (renderer, event_pump)
-
 }
 
 fn main() {
@@ -152,7 +163,13 @@ fn main() {
     let (mut renderer, mut events) = init();
     let mut grid_vector = grid_init(NCELLS);
 
+    rocket::ignite()
+        .mount("/cell", routes![create])
+        //.mount("/heroes", routes![read])
+        .launch();
+
     'running:loop {
+
         for event in events.poll_iter() {
             match event {
                 Event::KeyDown {
@@ -163,8 +180,10 @@ fn main() {
             }
         }
 
+
         display_frame(&mut renderer, &grid_vector);
-        grid_vector = next_color_is_random(grid_vector);
+        //if no data is comming over http, draw init color
+        grid_vector = set_color_of_one_cell(grid_vector, cell);
 
         thread::sleep(time::Duration::from_millis(50));
     }
