@@ -1,10 +1,15 @@
 use rand::Rng;
+use std::sync::{Arc, Mutex};
 use sdl2::pixels::Color;
 use sdl2::rect::{Rect};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::Renderer;
 use sdl2::EventPump;
+
+pub mod cell;
+use cell::{Cell, Grid};
+
 //constants
 pub const MAX_X: i32 = 599;
 pub const MAX_Y: i32 = MAX_X;
@@ -14,10 +19,11 @@ pub const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
 
 //creates a grid with ncells*ncells initialized with cell in a color
-pub fn grid_init(ncells: i32) -> Vec<Vec<[u8; 3]>> {
+pub fn grid_init(ncells: i32) -> Grid {
     //let mut rng = rand::thread_rng();
 
     let mut grid_vector:Vec<Vec<[u8; 3]>> = Vec::new();
+
 
     let color_arr = [35_u8, 15_u8, 13_8];
 
@@ -27,8 +33,12 @@ pub fn grid_init(ncells: i32) -> Vec<Vec<[u8; 3]>> {
             grid_vector[row as usize].push(color_arr);
         }
     }
+    let output_grid = Grid {
+        grid: Arc::new(Mutex::new(grid_vector))
+    };
 
-    grid_vector
+    output_grid
+
 }
 
 
@@ -113,7 +123,7 @@ pub fn init<'a>()-> (Renderer<'a>, EventPump) {
     (renderer, event_pump)
 }
 
-// fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell: Cell) -> Vec<Vec<[u8; 3]>> {
+// pub fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell: Cell) -> Vec<Vec<[u8; 3]>> {
 //
 //
 //     let color_arr = [cell.red, cell.green, cell.blue];

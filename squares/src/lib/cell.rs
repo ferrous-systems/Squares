@@ -1,10 +1,11 @@
 use std::io::Cursor;
-
+use std::sync::{Arc, Mutex};
 use rocket::request::Request;
 use rocket::response::{self, Response, Responder};
 use rocket::http::ContentType;
+use std::sync::atomic::{AtomicUsize, AtomicIsize};
 //use serde::{Deserialize, Serialize};
-//use serde_json::Result;
+use serde_json::Result;
 
 #[derive(Serialize, Deserialize)]
 pub struct Cell {
@@ -16,7 +17,23 @@ pub struct Cell {
 }
 
 
+
 impl<'r> Responder<'r> for Cell {
+    fn respond_to(self, _: &Request) -> response::Result<'r> {
+        Response::build()
+            //.sized_body(Cursor::new(format!("{}:{}", self.name, self.age)))
+            //.raw_header("X-Person-Name", self.name)
+            //.raw_header("X-Person-Age", self.age.to_string())
+            //.header(ContentType::new("application", "x-person"))
+            .ok()
+    }
+}
+
+pub struct Grid {
+    pub grid: Arc<Mutex<Vec<Vec<[u8; 3]>>>>
+}
+
+impl<'r> Responder<'r> for Grid {
     fn respond_to(self, _: &Request) -> response::Result<'r> {
         Response::build()
             //.sized_body(Cursor::new(format!("{}:{}", self.name, self.age)))
