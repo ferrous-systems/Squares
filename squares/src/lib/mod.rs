@@ -53,7 +53,6 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &G
 
     let x = CELL_WIDTH * col;
     let y = CELL_WIDTH * row;
-    println!("{}", row);
 
     let cell_color = Color::RGB(grid[row as usize][col as usize][0],
                                 grid[row as usize][col as usize][1],
