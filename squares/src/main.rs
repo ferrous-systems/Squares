@@ -8,11 +8,8 @@ extern crate rand;
 
 use std::{thread, time};
 use std::sync::{Arc, Mutex};
-// use std::sync::atomic::{AtomicUsize, Ordering};
-//
-// use serde::{Deserialize, Serialize};
-// use serde_json::Result;
-use rocket_contrib::json::{Json};
+
+use rocket_contrib::json::Json;
 use rocket::State;
 
 use sdl2::event::Event;
@@ -21,9 +18,9 @@ use sdl2::keyboard::Keycode;
 
 pub mod lib;
 
-use lib::cell::{Cell, Grid};
+use lib::cell::Cell;
 
-//get cell information via http
+//get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
 fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
 
@@ -44,13 +41,14 @@ fn main() {
     thread::spawn(|| {
 
         //http requests
+        //if no data is comming over http, init color is drawn
+
         rocket::ignite()
             .mount("/cell", routes![create])
             .manage(grid)
             .launch();
 
     });
-
 
 
     //video loop
@@ -67,9 +65,6 @@ fn main() {
         }
 
         lib::display_frame(&mut renderer, &grid_vector);
-
-        //if no data is comming over http, draw init color
-
 
         thread::sleep(time::Duration::from_millis(50));
     }

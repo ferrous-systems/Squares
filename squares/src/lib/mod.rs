@@ -1,14 +1,14 @@
 use rand::Rng;
+
 use std::sync::{Arc, Mutex};
+
 use sdl2::pixels::Color;
-use sdl2::rect::{Rect};
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
 use sdl2::render::Renderer;
 use sdl2::EventPump;
 
 pub mod cell;
-use cell::{Cell, Grid};
+use cell::Grid;
 
 //constants
 pub const MAX_X: i32 = 599;
@@ -20,12 +20,9 @@ pub const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
 //creates a grid with ncells*ncells initialized with cell in a color
 pub fn grid_init(ncells: i32) -> Grid {
-    //let mut rng = rand::thread_rng();
 
     let mut grid_vector:Vec<Vec<[u8; 3]>> = Vec::new();
-
-
-    let color_arr = [35_u8, 15_u8, 13_8];
+    let color_arr = [35_u8, 15_u8, 13_u8];
 
     for row in 0..ncells {
         grid_vector.push(Vec::new());
@@ -54,8 +51,8 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &G
 
     let grid = grid_vector.grid.lock().unwrap();
 
-    let mut x = CELL_WIDTH * col;
-    let mut y = CELL_WIDTH * row;
+    let x = CELL_WIDTH * col;
+    let y = CELL_WIDTH * row;
     println!("{}", row);
 
     let cell_color = Color::RGB(grid[row as usize][col as usize][0],
@@ -74,7 +71,7 @@ pub fn display_frame(renderer: &mut Renderer, grid_vector: &Grid) {
 
     //let mut grid = grid_vector.grid.lock().unwrap();
 
-    renderer.set_draw_color(Color::RGB(200, 200, 200));
+    renderer.set_draw_color(Color::RGB(35, 15, 13));
     renderer.clear();
 
     for row in 0..NCELLS {
@@ -123,19 +120,9 @@ pub fn init<'a>()-> (Renderer<'a>, EventPump) {
 
     let event_pump = sdl_context.event_pump().unwrap();
 
-    renderer.set_draw_color(Color::RGB(0, 0, 0)); //color does not change since being declared here!
+    renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!
     renderer.clear();
     renderer.present();
 
     (renderer, event_pump)
 }
-
-// pub fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell: Cell) -> Vec<Vec<[u8; 3]>> {
-//
-//
-//     let color_arr = [cell.red, cell.green, cell.blue];
-//     grid_vector[cell.row as usize][cell.column as usize] = color_arr;
-//
-//     grid_vector
-//
-// }
