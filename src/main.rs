@@ -14,7 +14,7 @@ use rocket::State;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::video::FullscreenType::Desktop;
+
 
 
 pub mod lib;
@@ -35,7 +35,7 @@ fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
 
 fn main() {
 
-    let (mut renderer, mut events, window) = lib::init();
+    let (mut renderer, mut events, video_subsystem) = lib::init();
     let grid_vector = lib::grid_init(lib::NCELLS);
     let grid = grid_vector.grid.clone();
 
@@ -66,9 +66,9 @@ fn main() {
                     keycode: Some(Keycode::Space), ..
                 } =>
                         {
-                            window.set_fullscreen(Desktop);
-                            // let mut renderer = lib::set_fullscreen(&mut window);
-                            // println!("panic!");
+
+                            let mut renderer = lib::set_fullscreen(&video_subsystem);
+                            println!("panic!");
                             lib::display_frame2(&mut renderer, &grid_vector);
 
                             thread::sleep(time::Duration::from_millis(50));
