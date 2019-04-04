@@ -16,6 +16,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 
+
 pub mod lib;
 
 use lib::cell::Cell;
@@ -26,7 +27,7 @@ fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
 
     let color_arr = [cell.red, cell.green, cell.blue];
 
-    let mut grid = grid_vector.lock().unwrap();
+    let mut grid = grid_vector.lock().expect("grid lock failed");
     grid[cell.row as usize][cell.column as usize] = color_arr;
     println!("{:?}", grid)
 
@@ -34,7 +35,7 @@ fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
 
 fn main() {
 
-    let (mut renderer, mut events) = lib::init();
+    let (mut renderer, mut events, video_subsystem) = lib::init();
     let grid_vector = lib::grid_init(lib::NCELLS);
     let grid = grid_vector.grid.clone();
 
@@ -60,6 +61,22 @@ fn main() {
                     keycode: Some(Keycode::Escape), ..
                 } =>
                         { break 'running },
+
+                Event::KeyDown {
+                    keycode: Some(Keycode::Space), ..
+                } =>
+                        {
+
+                            let mut renderer = lib::set_fullscreen(&video_subsystem);
+                            println!("panic!");
+                            lib::display_frame2(&mut renderer, &grid_vector);
+
+                            thread::sleep(time::Duration::from_millis(50));
+
+                            continue 'running
+
+                        },
+
                 _ =>    {}
             }
         }

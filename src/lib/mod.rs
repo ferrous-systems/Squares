@@ -6,6 +6,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
 use sdl2::EventPump;
+use sdl2::VideoSubsystem;
 
 pub mod cell;
 use cell::Grid;
@@ -49,11 +50,10 @@ pub fn random_rgb () -> u8 {
 //converts row column values into xy pixels and draws rectangle in the specified color
 pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Grid) {
 
-    let grid = grid_vector.grid.lock().unwrap();
+    let grid = grid_vector.grid.lock().expect("53");
 
     let x = CELL_WIDTH * col;
     let y = CELL_WIDTH * row;
-    println!("{}", row);
 
     let cell_color = Color::RGB(grid[row as usize][col as usize][0],
                                 grid[row as usize][col as usize][1],
@@ -86,6 +86,25 @@ pub fn display_frame(renderer: &mut Renderer, grid_vector: &Grid) {
     renderer.present();
 }
 
+pub fn display_frame2(renderer: &mut Renderer, grid_vector: &Grid) {
+
+    //let mut grid = grid_vector.grid.lock().unwrap();
+
+    renderer.set_draw_color(Color::RGB(35, 15, 13));
+    renderer.clear();
+
+    for row in 0..NCELLS {
+        for column in 0..NCELLS {
+            display_cell(renderer, row, column, grid_vector)
+            //if v[i as usize][j as usize] {
+            //    display_cell(r, i, j)
+            //}
+        }
+    }
+
+    renderer.present();
+    println!("other panic");
+}
 
 pub fn next_color_is_random(grid_vector: Vec<Vec<[u8; 3]>>) -> Vec<Vec<[u8; 3]>> {
     let mut new_grid_vector:Vec<Vec<[u8; 3]>> = Vec::new();
@@ -106,15 +125,15 @@ pub fn next_color_is_random(grid_vector: Vec<Vec<[u8; 3]>>) -> Vec<Vec<[u8; 3]>>
     new_grid_vector
 }
 
-pub fn init<'a>()-> (Renderer<'a>, EventPump) {
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+pub fn init<'a>()-> (Renderer<'a>, EventPump, VideoSubsystem) {
+    let sdl_context = sdl2::init().expect("sdl init failed");
+    let video_subsystem = sdl_context.video().expect("video subsystem failed");
 
     let window = video_subsystem.window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
         .position_centered()
         .opengl()
         .build()
-        .unwrap();
+        .expect("y");
 
     let mut renderer = window.renderer().build().unwrap();
 
@@ -124,5 +143,21 @@ pub fn init<'a>()-> (Renderer<'a>, EventPump) {
     renderer.clear();
     renderer.present();
 
-    (renderer, event_pump)
+    (renderer, event_pump, video_subsystem)
+}
+
+pub fn set_fullscreen<'a>(video_subsystem: &VideoSubsystem)-> Renderer<'a> {
+
+    let window = video_subsystem.window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
+        .position_centered()
+        .fullscreen_desktop()
+        .opengl()
+        .build()
+        .expect("156");
+
+    let renderer = window.renderer().build().expect("158");
+
+    renderer
+
+
 }
