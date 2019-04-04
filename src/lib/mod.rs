@@ -133,11 +133,11 @@ pub fn init<'a>()-> (Renderer<'a>, EventPump, VideoSubsystem) {
         .position_centered()
         .opengl()
         .build()
-        .expect("window failed");
+        .expect("y");
 
-    let mut renderer = window.renderer().build().expect("renderer failed");
+    let mut renderer = window.renderer().build().unwrap();
 
-    let event_pump = sdl_context.event_pump().expect("event pump failed");;
+    let event_pump = sdl_context.event_pump().unwrap();
 
     renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!
     renderer.clear();
