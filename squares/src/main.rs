@@ -8,10 +8,11 @@ extern crate rand;
 
 use std::{thread, time};
 use std::sync::{Arc, Mutex};
-
-use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use rocket_contrib::json::{Json, JsonValue};
+// use std::sync::atomic::{AtomicUsize, Ordering};
+//
+// use serde::{Deserialize, Serialize};
+// use serde_json::Result;
+use rocket_contrib::json::{Json};
 use rocket::State;
 
 use sdl2::event::Event;
@@ -24,42 +25,32 @@ use lib::cell::{Cell, Grid};
 
 //get cell information via http
 #[post("/", data = "<cell>")]
-fn create(cell: Json<Cell>, grid_vector: State<Grid>) {
+fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
 
     let color_arr = [cell.red, cell.green, cell.blue];
 
-    let grid = grid_vector.0;
-
-    
-
-
-    //[cell.row as usize][cell.column as usize] = color_arr;
-
-
+    let mut grid = grid_vector.lock().unwrap();
+    grid[cell.row as usize][cell.column as usize] = color_arr;
+    println!("{:?}", grid)
 
 }
-
-// fn set_color_of_one_cell(grid_vector: Vec<Vec<[u8; 3]>>, cell: Cell) -> Vec<Vec<[u8; 3]>> {
-//
-//     let color_arr = [cell.red, cell.green, cell.blue];
-//     grid_vector[cell.row as usize][cell.column as usize] = color_arr;
-//
-//     grid_vector
-// }
-
 
 fn main() {
 
     let (mut renderer, mut events) = lib::init();
-    let mut grid_vector = lib::grid_init(lib::NCELLS);
+    let grid_vector = lib::grid_init(lib::NCELLS);
+    let grid = grid_vector.grid.clone();
 
+    thread::spawn(|| {
 
+        //http requests
+        rocket::ignite()
+            .mount("/cell", routes![create])
+            .manage(grid)
+            .launch();
 
-    //http requests
-    rocket::ignite()
-        .mount("/cell", routes![create])
-        .manage(grid_vector)
-        .launch();
+    });
+
 
 
     //video loop
@@ -78,8 +69,7 @@ fn main() {
         lib::display_frame(&mut renderer, &grid_vector);
 
         //if no data is comming over http, draw init color
-        grid_vector = set_color_of_one_cell(grid_vector, cell);
-        grid_vector = lib::next_color_is_random(grid_vector);
+
 
         thread::sleep(time::Duration::from_millis(50));
     }

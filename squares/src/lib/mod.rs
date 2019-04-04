@@ -33,12 +33,13 @@ pub fn grid_init(ncells: i32) -> Grid {
             grid_vector[row as usize].push(color_arr);
         }
     }
+
     let output_grid = Grid {
         grid: Arc::new(Mutex::new(grid_vector))
+
     };
 
     output_grid
-
 }
 
 
@@ -49,15 +50,17 @@ pub fn random_rgb () -> u8 {
 
 
 //converts row column values into xy pixels and draws rectangle in the specified color
-pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Vec<Vec<[u8; 3]>>) {
+pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Grid) {
+
+    let grid = grid_vector.grid.lock().unwrap();
 
     let mut x = CELL_WIDTH * col;
     let mut y = CELL_WIDTH * row;
     println!("{}", row);
 
-    let cell_color = Color::RGB(grid_vector[row as usize][col as usize][0],
-                                grid_vector[row as usize][col as usize][1],
-                                grid_vector[row as usize][col as usize][2]);
+    let cell_color = Color::RGB(grid[row as usize][col as usize][0],
+                                grid[row as usize][col as usize][1],
+                                grid[row as usize][col as usize][2]);
 
     renderer.set_draw_color(cell_color);
     renderer.fill_rect(Rect::new(x, y,
@@ -67,9 +70,13 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &V
 
 
 //displays the whole grid by repeatedly calling display_cell on the alive cells
-pub fn display_frame(renderer: &mut Renderer, grid_vector: &Vec<Vec<[u8; 3]>>) {
+pub fn display_frame(renderer: &mut Renderer, grid_vector: &Grid) {
+
+    //let mut grid = grid_vector.grid.lock().unwrap();
+
     renderer.set_draw_color(Color::RGB(200, 200, 200));
     renderer.clear();
+
     for row in 0..NCELLS {
         for column in 0..NCELLS {
             display_cell(renderer, row, column, grid_vector)
