@@ -1,15 +1,17 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate rocket;
+#[macro_use]
+extern crate serde_derive;
 
-extern crate sdl2;
 extern crate rand;
+extern crate sdl2;
 
 use std::{thread, time};
 
-use rocket_contrib::json::Json;
 use rocket::State;
+use rocket_contrib::json::Json;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -17,13 +19,24 @@ use sdl2::keyboard::Keycode;
 pub mod lib;
 
 use lib::api::Cell;
-use lib::data::{RGB, SharedGrid};
+use lib::data::{SharedGrid, RGB};
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
 fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) {
 
-    let color_arr = RGB { red: cell.red, green: cell.green, blue: cell.blue };
+    //checks values
+    assert!(cell.row <= 14, "Row value must be between 0 and 14");
+    assert!(cell.row >= 0, "Row value must be between 0 and 14");
+    assert!(cell.column <= 15, "Column value must be between 0 and 14");
+    assert!(cell.column >= 0, "Column value must be between 0 and 14");
+
+
+    let color_arr = RGB {
+        red: cell.red,
+        green: cell.green,
+        blue: cell.blue,
+    };
 
     let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
     //let mut grid = &sharedgrid_data.grid;
@@ -32,17 +45,14 @@ fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) {
     // println!("{:?}", grid)
 }
 
-
 fn main() {
-
     let (mut renderer, mut events, video_subsystem) = lib::init();
     let shared_grid = lib::grid_init(lib::NCELLS);
-    let sharedgrid_data = shared_grid.sharedgrid.clone();
-
-
+    let sharedgrid_data = SharedGrid {
+        sharedgrid: shared_grid.sharedgrid.clone()
+    };
 
     thread::spawn(|| {
-
         //http requests
         //if no data is comming over http, init color is drawn
 
@@ -50,35 +60,30 @@ fn main() {
             .mount("/cell", routes![create])
             .manage(sharedgrid_data)
             .launch();
-
     });
 
-
     //video loop
-    'running:loop {
-
+    'running: loop {
         for event in events.poll_iter() {
             match event {
                 Event::KeyDown {
-                    keycode: Some(Keycode::Escape), ..
-                } =>
-                        { break 'running },
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
 
                 Event::KeyDown {
-                    keycode: Some(Keycode::Space), ..
-                } =>
-                        {
+                    keycode: Some(Keycode::Space),
+                    ..
+                } => {
+                    let mut renderer = lib::set_fullscreen(&video_subsystem);
+                    println!("panic!");
 
-                            let mut renderer = lib::set_fullscreen(&video_subsystem);
-                            println!("panic!");
+                    thread::sleep(time::Duration::from_millis(50));
 
-                            thread::sleep(time::Duration::from_millis(50));
+                    continue 'running;
+                }
 
-                            continue 'running
-
-                        },
-
-                _ =>    {}
+                _ => {}
             }
         }
 
