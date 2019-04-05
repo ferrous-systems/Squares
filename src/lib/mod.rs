@@ -8,8 +8,8 @@ use sdl2::render::Renderer;
 use sdl2::EventPump;
 use sdl2::VideoSubsystem;
 
-pub mod cell;
-use cell::Grid;
+pub mod data;
+use data::Grid;
 
 //constants
 pub const MAX_X: i32 = 599;
