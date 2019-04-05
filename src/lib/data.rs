@@ -1,8 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 pub struct Grid {
-    pub grid: Vec<Vec<RGB>>
-
+    pub grid: Vec<Vec<RGB>>,
 }
 
 pub struct RGB {
@@ -12,5 +11,5 @@ pub struct RGB {
 }
 
 pub struct SharedGrid {
-    pub sharedgrid: Arc<Mutex<Grid>>
+    pub sharedgrid: Arc<Mutex<Grid>>,
 }
