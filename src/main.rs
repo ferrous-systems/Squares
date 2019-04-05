@@ -7,7 +7,6 @@ extern crate sdl2;
 extern crate rand;
 
 use std::{thread, time};
-use std::sync::{Arc, Mutex};
 
 use rocket_contrib::json::Json;
 use rocket::State;
@@ -18,16 +17,18 @@ use sdl2::keyboard::Keycode;
 pub mod lib;
 
 use lib::api::Cell;
-use lib::data::RGB;
+use lib::data::{RGB, SharedGrid};
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
-fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<RGB>>>>>) {
+fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) {
 
     let color_arr = RGB { red: cell.red, green: cell.green, blue: cell.blue };
 
-    let mut grid = grid_vector.lock().expect("grid lock failed");
-    grid[cell.row as usize][cell.column as usize] = color_arr;
+    let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
+    //let mut grid = &sharedgrid_data.grid;
+
+    sharedgrid_data.grid[cell.row as usize][cell.column as usize] = color_arr;
     // println!("{:?}", grid)
 }
 
@@ -35,8 +36,10 @@ fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<RGB>>>>>) {
 fn main() {
 
     let (mut renderer, mut events, video_subsystem) = lib::init();
-    let grid_vector = lib::grid_init(lib::NCELLS);
-    let grid = grid_vector.grid.clone();
+    let shared_grid = lib::grid_init(lib::NCELLS);
+    let sharedgrid_data = shared_grid.sharedgrid.clone();
+
+
 
     thread::spawn(|| {
 
@@ -45,7 +48,7 @@ fn main() {
 
         rocket::ignite()
             .mount("/cell", routes![create])
-            .manage(grid)
+            .manage(sharedgrid_data)
             .launch();
 
     });
@@ -79,8 +82,7 @@ fn main() {
             }
         }
 
-        lib::display_frame(&mut renderer, &grid_vector);
-
+        lib::display_frame(&mut renderer, &shared_grid);
         thread::sleep(time::Duration::from_millis(50));
     }
 }
