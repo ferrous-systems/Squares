@@ -17,11 +17,7 @@ use sdl2::keyboard::Keycode;
 pub mod lib;
 
 use lib::api::Cell;
-<<<<<<< HEAD
 use lib::data::{RGB, SharedGrid};
-=======
-use lib::data::{RGB, SharedGrid, Grid};
->>>>>>> 720d632a38bbf12cae10d264294b748f6428b155
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
