@@ -11,8 +11,7 @@ use sdl2::VideoSubsystem;
 pub mod data;
 pub mod api;
 
-use data::Grid;
-use data::RGB;
+use data::{RGB, Grid, SharedGrid};
 
 //constants
 pub const MAX_X: i32 = 599;
@@ -23,9 +22,9 @@ pub const NCELLS: i32 = (MAX_X+1)/CELL_WIDTH;
 
 
 //creates a grid with ncells*ncells initialized with cell in a color
-pub fn grid_init(ncells: i32) -> Grid {
+pub fn grid_init(ncells: i32) -> SharedGrid {
 
-    let mut grid_vector:Vec<Vec<RGB>> = Vec::new();
+    let mut grid_vector = Vec::new();
 
     for row in 0..ncells {
         grid_vector.push(Vec::new());
@@ -33,10 +32,12 @@ pub fn grid_init(ncells: i32) -> Grid {
             grid_vector[row as usize].push(RGB {red: 35_u8, green: 15_u8, blue: 13_u8});
         }
     }
+    let grid = Grid {
+        grid: grid_vector,
+    };
 
-    let output_grid = Grid {
-        grid: Arc::new(Mutex::new(grid_vector))
-
+    let output_grid = SharedGrid {
+        sharedgrid: Arc::new(Mutex::new(grid))
     };
 
     output_grid
@@ -50,9 +51,11 @@ pub fn random_rgb () -> u8 {
 
 
 //converts row column values into xy pixels and draws rectangle in the specified color
-pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &Grid) {
+pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_data: &Grid) {
 
-    let grid = grid_vector.grid.lock().expect("53");
+    //let sharedgrid_data = shared_grid.sharedgrid;
+    //let grid_data = sharedgrid_data.lock().expect("grid lock failed");
+    let grid = &grid_data.grid;
 
     let x = CELL_WIDTH * col;
     let y = CELL_WIDTH * row;
@@ -68,7 +71,10 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_vector: &G
 
 
 //displays the whole grid by repeatedly calling display_cell on every cell
-pub fn display_frame(renderer: &mut Renderer, grid_vector: &Grid) {
+pub fn display_frame(renderer: &mut Renderer, shared_grid: &SharedGrid) {
+
+    let sharedgrid_data = &shared_grid.sharedgrid;
+    let grid_data = sharedgrid_data.lock().expect("grid lock failed");
 
     //let mut grid = grid_vector.grid.lock().unwrap();
     renderer.set_draw_color(Color::RGB(35, 15, 13));
@@ -76,7 +82,7 @@ pub fn display_frame(renderer: &mut Renderer, grid_vector: &Grid) {
 
     for row in 0..NCELLS {
         for column in 0..NCELLS {
-            display_cell(renderer, row, column, grid_vector)
+            display_cell(renderer, row, column, &grid_data)
         }
     }
     renderer.present();
