@@ -15,23 +15,22 @@ use rocket::State;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-
-
 pub mod lib;
 
-use lib::cell::Cell;
+use lib::api::Cell;
+use lib::data::RGB;
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
-fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<[u8; 3]>>>>>) {
+fn create(cell: Json<Cell>, grid_vector: State<Arc<Mutex<Vec<Vec<RGB>>>>>) {
 
-    let color_arr = [cell.red, cell.green, cell.blue];
+    let color_arr = RGB { red: cell.red, green: cell.green, blue: cell.blue };
 
     let mut grid = grid_vector.lock().expect("grid lock failed");
     grid[cell.row as usize][cell.column as usize] = color_arr;
-    println!("{:?}", grid)
-
+    // println!("{:?}", grid)
 }
+
 
 fn main() {
 
@@ -69,7 +68,6 @@ fn main() {
 
                             let mut renderer = lib::set_fullscreen(&video_subsystem);
                             println!("panic!");
-                            lib::display_frame2(&mut renderer, &grid_vector);
 
                             thread::sleep(time::Duration::from_millis(50));
 
