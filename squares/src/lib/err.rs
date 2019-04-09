@@ -43,10 +43,10 @@ pub mod echain {
     // }
 }
 
-pub fn is_value_in_range(cell: &Json<Cell>) -> std::io::Result<()> {
-    if cell.column < 0 || cell.column > 14 {
+pub fn is_value_in_range(cell: &Json<Cell>, max_rows: &usize, max_columns: &usize) -> std::io::Result<()> {
+    if cell.column < 0 || cell.column > (*max_columns - 1) as i32 {
         Err(Error::new(ErrorKind::Other, "Column value out of range"))
-    } else if cell.row < 0 || cell.row > 14 {
+    } else if cell.row < 0 || cell.row > (*max_rows - 1) as i32 {
         Err(Error::new(ErrorKind::Other, "Row value out of range"))
     } else {
         Ok(())

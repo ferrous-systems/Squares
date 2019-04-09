@@ -14,20 +14,14 @@ pub mod err;
 
 use data::{Grid, SharedGrid, RGB};
 
-//constants
-pub const MAX_X: i32 = 599;
-pub const MAX_Y: i32 = MAX_X;
-pub const CELL_WIDTH: i32 = 40;
-pub const CELL_HEIGHT: i32 = CELL_WIDTH;
-pub const NCELLS: i32 = (MAX_X + 1) / CELL_WIDTH;
 
 //creates a grid with ncells*ncells initialized with cell in a color
-pub fn grid_init(ncells: i32) -> SharedGrid {
+pub fn grid_init(nx_cells: i32, ny_cells: i32) -> SharedGrid {
     let mut grid_vector = Vec::new();
 
-    for row in 0..ncells {
+    for row in 0..ny_cells + 1 {
         grid_vector.push(Vec::new());
-        for _column in 0..ncells {
+        for _column in 0..nx_cells + 1 {
             grid_vector[row as usize].push(RGB {
                 red: 35_u8,
                 green: 15_u8,
@@ -50,19 +44,20 @@ pub fn random_rgb() -> u8 {
 }
 
 //converts row column values into xy pixels and draws rectangle in the specified color
-pub fn display_cell(renderer: &mut Canvas<Window>, row: i32, col: i32, grid_data: &Grid) {
-    //let sharedgrid_data = shared_grid.sharedgrid;
-    //let grid_data = sharedgrid_data.lock().expect("grid lock failed");
+pub fn display_cell(renderer: &mut Canvas<Window>, row: i32, col: i32, grid_data: &Grid, cell_width: &i32) {
+
+    let cell_height = cell_width;
+
     let grid = &grid_data.grid;
 
-    let x = CELL_WIDTH * col;
-    let y = CELL_WIDTH * row;
+    let x = cell_width * col;
+    let y = cell_width * row;
 
     let cell_color = &grid[row as usize][col as usize];
     let drawing_color = Color::RGB(cell_color.red, cell_color.green, cell_color.blue);
 
     renderer.set_draw_color(drawing_color);
-    let square = renderer.fill_rect(Rect::new(x, y, CELL_WIDTH as u32, CELL_HEIGHT as u32));
+    let square = renderer.fill_rect(Rect::new(x, y, *cell_width as u32, *cell_height as u32));
     match square {
         Ok(()) => {}
         Err(error) => println!("{}", error),
@@ -70,17 +65,17 @@ pub fn display_cell(renderer: &mut Canvas<Window>, row: i32, col: i32, grid_data
 }
 
 //displays the whole grid by repeatedly calling display_cell on every cell
-pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid) {
+pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid, nx_cells: &i32, ny_cells: &i32, cell_width: &i32) {
     let sharedgrid_data = &shared_grid.sharedgrid;
     let grid_data = sharedgrid_data.lock().expect("grid lock failed");
 
-    //let mut grid = grid_vector.grid.lock().unwrap();
+
     renderer.set_draw_color(Color::RGB(35, 15, 13));
     renderer.clear();
 
-    for row in 0..NCELLS {
-        for column in 0..NCELLS {
-            display_cell(renderer, row, column, &grid_data)
+    for row in 0..*ny_cells {
+        for column in 0..*nx_cells {
+            display_cell(renderer, row, column, &grid_data, &cell_width)
         }
     }
     renderer.present();
@@ -103,19 +98,18 @@ pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid) {
 //     new_grid_vector
 //}
 
-pub fn new_init<'a>() -> (Canvas<Window>, EventPump) {
+pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
+        .window("demo", x as u32 + 1, y as u32 + 1)
         .position_centered()
         .build()
         .unwrap();
 
     let mut canvas = window
         .into_canvas()
-        //.target_texture()
         .present_vsync()
         .build()
         .unwrap();
@@ -138,10 +132,29 @@ pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32) {
     (width, height)
 }
 
-pub fn center_rect(width: i32, height: i32) -> Rect {
-    let x = (width - MAX_X) / 2;
-    let y = (height - MAX_Y) / 2;
-    let center_rect = Rect::new(x, y, width as u32, height as u32);
+pub fn center_rect(res_width: i32, res_height: i32, canvas_width: i32, canvas_height: i32) -> Rect {
+    let x = (res_width - canvas_width) / 2;
+    let y = (res_height - canvas_height) / 2;
+    let center_rect = Rect::new(x, y, res_width as u32, res_height as u32);
 
     center_rect
+}
+
+pub fn determine_canvas_size(nx_cells: i32, ny_cells: i32) -> (i32, i32, i32) {
+
+    let (mut canvas, mut _events) = init(100, 100);
+    let screen_resolution = get_screen_resolution(&mut canvas);
+
+    if nx_cells == ny_cells {
+        let canvas_height = screen_resolution.1 - 200;
+        let canvas_width = canvas_height;
+        let cell_width = canvas_height / ny_cells;
+        (canvas_width, canvas_height, cell_width)
+
+    } else {
+        let canvas_height = screen_resolution.1 - 200;
+        let cell_width = canvas_height / ny_cells;
+        let canvas_width = cell_width * nx_cells;
+        (canvas_width, canvas_height, cell_width)
+    }
 }

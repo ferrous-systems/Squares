@@ -25,11 +25,25 @@ pub mod lib;
 use lib::api::Cell;
 use lib::data::{SharedGrid, RGB};
 
+use structopt::StructOpt;
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "basic")]
+struct CommandLineArgs {
+    rows: i32,
+    columns: i32,
+}
+
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
 fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
+
+    let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
+    let max_rows = &sharedgrid_data.grid.len();
+    let max_columns = &sharedgrid_data.grid[0].len();
+
     //checks values
-    let values = lib::err::is_value_in_range(&cell);
+    let values = lib::err::is_value_in_range(&cell, max_rows, max_columns);
     match values {
         Ok(()) => {
             let color_arr = RGB {
@@ -38,10 +52,9 @@ fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
                 blue: cell.blue,
             };
 
-            let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
-            //let mut grid = &sharedgrid_data.grid;
 
-            sharedgrid_data.grid[cell.row as usize][cell.column as usize] = color_arr;
+
+            sharedgrid_data.grid[(cell.row - 1)as usize][(cell.column - 1) as usize] = color_arr;
             // println!("{:?}", grid)
 
             json!("success")
@@ -55,8 +68,15 @@ fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
 }
 
 fn main() {
-    let (mut canvas, mut events) = lib::new_init();
-    let shared_grid = lib::grid_init(lib::NCELLS);
+
+
+    let args = CommandLineArgs::from_args();
+
+    //init for video loop
+    let (canvas_width, canvas_height, cell_width) = lib::determine_canvas_size(args.columns, args.rows);
+
+    let (mut canvas, mut events) = lib::init(canvas_width, canvas_height);
+    let shared_grid = lib::grid_init(args.columns, args.rows);
     let sharedgrid_data = SharedGrid {
         sharedgrid: shared_grid.sharedgrid.clone(),
     };
@@ -92,7 +112,7 @@ fn main() {
                         //change viewport
                         let screen_resolution = lib::get_screen_resolution(&mut canvas);
                         let center_rect =
-                            lib::center_rect(screen_resolution.0, screen_resolution.1);
+                            lib::center_rect(screen_resolution.0, screen_resolution.1, canvas_width, canvas_height);
 
                         canvas.set_viewport(center_rect);
                         continue 'running;
@@ -106,7 +126,7 @@ fn main() {
             }
         }
 
-        lib::display_frame(&mut canvas, &shared_grid);
+        lib::display_frame(&mut canvas, &shared_grid, &args.columns, &args.rows, &cell_width);
         thread::sleep(time::Duration::from_millis(50));
     }
 }
