@@ -13,11 +13,12 @@ use std::{thread, time};
 
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
+use rocket_contrib::json;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-use serde_json::json;
+// use serde_json::json;
 
 pub mod lib;
 
@@ -28,16 +29,20 @@ use lib::err::echain::{Error, ResultExt};
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
-fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> Result<Json<JsonValue>, Error> {
+fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> Result<JsonValue, Error> {
 
     //checks values
-    let column = lib::err::is_in_column_range(cell.column);
-    match column {
-        Ok(column) => column,
-        Err(error) => {
-            println!("he{:?}", error);
-        }
-    };
+    let column = lib::err::is_in_column_range(cell.column).chain_err(|| "test")?;
+
+    Ok(json!({
+        "result": "success"
+    }))
+    // match column {
+    //     Ok(column) => column,
+    //     Err(error) => {
+    //         println!("he{:?}", error);
+    //     }
+    // };
 
 
 
