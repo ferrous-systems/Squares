@@ -62,7 +62,12 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_data: &Gri
     let drawing_color = Color::RGB(cell_color.red, cell_color.green, cell_color.blue);
 
     renderer.set_draw_color(drawing_color);
-    renderer.fill_rect(Rect::new(x, y, CELL_WIDTH as u32, CELL_HEIGHT as u32));
+    let square = renderer.fill_rect(Rect::new(x, y, CELL_WIDTH as u32, CELL_HEIGHT as u32));
+    match square {
+        Ok(()) => {}
+        Err(error) => println!("{}", error)
+    }
+
 }
 
 //displays the whole grid by repeatedly calling display_cell on every cell
@@ -111,7 +116,6 @@ pub fn init<'a>() -> (Renderer<'a>, EventPump, VideoSubsystem) {
         .expect("y");
 
     let mut renderer = window.renderer().build().unwrap();
-
     let event_pump = sdl_context.event_pump().unwrap();
 
     renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!

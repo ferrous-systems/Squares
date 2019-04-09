@@ -13,55 +13,48 @@ use std::{thread, time};
 
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
+use rocket_contrib::json;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-use serde_json::json;
+//use serde_json::json;
 
 pub mod lib;
 
 use lib::api::Cell;
 use lib::data::{SharedGrid, RGB};
-use lib::err::echain::{Error, ResultExt};
 
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
-fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> Result<Json<JsonValue>, Error> {
+fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
 
     //checks values
-    let column = lib::err::is_in_column_range(cell.column);
-    match column {
-        Ok(column) => column,
-        Err(error) => {
-            println!("he{:?}", error);
+    let values = lib::err::is_value_in_range(&cell);//.chain_err(|| "test");
+    match values {
+        Ok(()) => {
+
+            let color_arr = RGB {
+                red: cell.red,
+                green: cell.green,
+                blue: cell.blue,
+            };
+
+            let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
+            //let mut grid = &sharedgrid_data.grid;
+
+            sharedgrid_data.grid[cell.row as usize][cell.column as usize] = color_arr;
+            // println!("{:?}", grid)
+
+            json!("success")
         }
-    };
 
-
-
-
-
-    //assert!(cell.row <= 14, "Row value must be between 0 and 14");
-    //assert!(cell.row >= 0, "Row value must be between 0 and 14");
-    //assert!(cell.column <= 15, "Column value must be between 0 and 14");
-    //assert!(cell.column >= 0, "Column value must be between 0 and 14");
-
-
-    //
-    // let color_arr = RGB {
-    //     red: cell.red,
-    //     green: cell.green,
-    //     blue: cell.blue,
-    // };
-    //
-    // let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
-    // //let mut grid = &sharedgrid_data.grid;
-    //
-    // sharedgrid_data.grid[cell.row as usize][cell.column as usize] = color_arr;
-    // // println!("{:?}", grid)
-    // res
+        Err(error) => {
+            let response = error.to_string();
+            json!(response)
+        }
+    }
 }
 
 fn main() {
