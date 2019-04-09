@@ -19,7 +19,6 @@ use rocket_contrib::json;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-//use serde_json::json;
 
 pub mod lib;
 
@@ -85,12 +84,23 @@ fn main() {
                 } => break 'running,
                 Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
 
+
+
                     if canvas.window_mut().fullscreen_state() == FullscreenType::Off {
                         canvas.window_mut().set_fullscreen(Desktop).unwrap();
+
+                        //change viewport
+                        let screen_resolution = lib::get_screen_resolution(&mut canvas);
+                        let center_rect = lib::center_rect(screen_resolution.0, screen_resolution.1);
+
+                        canvas.set_viewport(center_rect);
+
+
                         continue 'running
 
                     } else {
                         canvas.window_mut().set_fullscreen(Off).unwrap();
+
                         continue 'running
                     };
                 }
@@ -98,7 +108,7 @@ fn main() {
                 _ => continue 'running,
             }
         }
-
+        //println!("1 {:?}", canvas.viewport());
         lib::display_frame(&mut canvas, &shared_grid);
         thread::sleep(time::Duration::from_millis(50));
     }

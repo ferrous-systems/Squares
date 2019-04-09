@@ -1,4 +1,4 @@
-use sdl2::video::{Window, WindowContext};
+use sdl2::video::{Window};
 use rand::Rng;
 
 use std::sync::{Arc, Mutex};
@@ -7,7 +7,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::EventPump;
-use sdl2::VideoSubsystem;
+
 
 pub mod api;
 pub mod data;
@@ -105,27 +105,6 @@ pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid) {
 //     new_grid_vector
 //}
 
-// pub fn init<'a>() -> (Renderer<'a>, EventPump) {
-//     let sdl_context = sdl2::init().expect("sdl init failed");
-//     let video_subsystem = sdl_context.video().expect("video subsystem failed");
-//
-//     let window = video_subsystem
-//         .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
-//         .position_centered()
-//         .opengl()
-//         .build()
-//         .expect("y");
-//
-//     let mut renderer = window.renderer().build().unwrap();
-//     let event_pump = sdl_context.event_pump().unwrap();
-//
-//     renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!
-//     renderer.clear();
-//     renderer.present();
-//
-//     (renderer, event_pump)
-// }
-
 pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -146,20 +125,24 @@ pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
     canvas.clear();
     canvas.present();
 
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let event_pump = sdl_context.event_pump().unwrap();
     (canvas, event_pump)
 }
 
-// pub fn set_fullscreen<'a>(video_subsystem: &VideoSubsystem) -> Renderer<'a> {
-//     let window = video_subsystem
-//         .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
-//         .position_centered()
-//         .fullscreen_desktop()
-//         .opengl()
-//         .build()
-//         .expect("156");
-//
-//     let renderer = window.renderer().build().expect("158");
-//
-//     renderer
-// }
+pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32){
+    let window = canvas.window_mut();
+    let video_subsystem = window.subsystem();
+    let display_mode = video_subsystem.current_display_mode(0).unwrap();
+    let width = display_mode.w;
+    let height = display_mode.h;
+
+    (width, height)
+}
+
+pub fn center_rect(width: i32, height: i32) -> Rect {
+    let x = (width - MAX_X) / 2;
+    let y = (height - MAX_Y) / 2;
+    let center_rect = Rect::new(x, y, width as u32, height as u32);
+
+    center_rect
+}
