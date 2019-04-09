@@ -1,5 +1,5 @@
-use sdl2::video::{Window};
 use rand::Rng;
+use sdl2::video::Window;
 
 use std::sync::{Arc, Mutex};
 
@@ -7,7 +7,6 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::EventPump;
-
 
 pub mod api;
 pub mod data;
@@ -66,9 +65,8 @@ pub fn display_cell(renderer: &mut Canvas<Window>, row: i32, col: i32, grid_data
     let square = renderer.fill_rect(Rect::new(x, y, CELL_WIDTH as u32, CELL_HEIGHT as u32));
     match square {
         Ok(()) => {}
-        Err(error) => println!("{}", error)
+        Err(error) => println!("{}", error),
     }
-
 }
 
 //displays the whole grid by repeatedly calling display_cell on every cell
@@ -105,7 +103,7 @@ pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid) {
 //     new_grid_vector
 //}
 
-pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
+pub fn new_init<'a>() -> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -115,7 +113,8 @@ pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
         .build()
         .unwrap();
 
-    let mut canvas = window.into_canvas()
+    let mut canvas = window
+        .into_canvas()
         //.target_texture()
         .present_vsync()
         .build()
@@ -129,7 +128,7 @@ pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
     (canvas, event_pump)
 }
 
-pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32){
+pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32) {
     let window = canvas.window_mut();
     let video_subsystem = window.subsystem();
     let display_mode = video_subsystem.current_display_mode(0).unwrap();

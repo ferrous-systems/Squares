@@ -5,9 +5,8 @@
 extern crate rocket;
 
 use crate::lib::api::Cell;
-use rocket_contrib::json::{Json};
+use rocket_contrib::json::Json;
 use std::io::{Error, ErrorKind};
-
 
 pub mod echain {
     // use rocket::request::Request;
@@ -16,7 +15,7 @@ pub mod echain {
     // use rocket::http::{Status, ContentType};
     // use serde_json::json;
     // This generates basic Error, Result, etc. types
-    error_chain!{ }
+    error_chain! {}
 
     // Implement `Responder` for `error_chain`'s `Error` type
     // that we just generated
@@ -43,7 +42,6 @@ pub mod echain {
     //     }
     // }
 }
-
 
 pub fn is_value_in_range(cell: &Json<Cell>) -> std::io::Result<()> {
     if cell.column < 0 || cell.column > 14 {

@@ -4,7 +4,8 @@
 extern crate rocket;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use] extern crate error_chain;
+#[macro_use]
+extern crate error_chain;
 
 extern crate rand;
 extern crate sdl2;
@@ -13,28 +14,24 @@ use sdl2::video::FullscreenType::{self, Desktop, Off};
 use std::{thread, time};
 
 use rocket::State;
-use rocket_contrib::json::{Json, JsonValue};
 use rocket_contrib::json;
+use rocket_contrib::json::{Json, JsonValue};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-
 
 pub mod lib;
 
 use lib::api::Cell;
 use lib::data::{SharedGrid, RGB};
 
-
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
 fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
-
     //checks values
-    let values = lib::err::is_value_in_range(&cell);//.chain_err(|| "test");
+    let values = lib::err::is_value_in_range(&cell);
     match values {
         Ok(()) => {
-
             let color_arr = RGB {
                 red: cell.red,
                 green: cell.green,
@@ -61,7 +58,7 @@ fn main() {
     let (mut canvas, mut events) = lib::new_init();
     let shared_grid = lib::grid_init(lib::NCELLS);
     let sharedgrid_data = SharedGrid {
-        sharedgrid: shared_grid.sharedgrid.clone()
+        sharedgrid: shared_grid.sharedgrid.clone(),
     };
 
     thread::spawn(|| {
@@ -78,37 +75,37 @@ fn main() {
     'running: loop {
         for event in events.poll_iter() {
             match event {
-                Event::Quit {..} | Event::KeyDown {
+                Event::Quit { .. }
+                | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
-                Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
 
-
-
+                Event::KeyDown {
+                    keycode: Some(Keycode::Space),
+                    ..
+                } => {
+                    //toggle fullscreen
                     if canvas.window_mut().fullscreen_state() == FullscreenType::Off {
                         canvas.window_mut().set_fullscreen(Desktop).unwrap();
 
                         //change viewport
                         let screen_resolution = lib::get_screen_resolution(&mut canvas);
-                        let center_rect = lib::center_rect(screen_resolution.0, screen_resolution.1);
+                        let center_rect =
+                            lib::center_rect(screen_resolution.0, screen_resolution.1);
 
                         canvas.set_viewport(center_rect);
-
-
-                        continue 'running
-
+                        continue 'running;
                     } else {
                         canvas.window_mut().set_fullscreen(Off).unwrap();
-
-                        continue 'running
+                        continue 'running;
                     };
                 }
 
                 _ => continue 'running,
             }
         }
-        //println!("1 {:?}", canvas.viewport());
+
         lib::display_frame(&mut canvas, &shared_grid);
         thread::sleep(time::Duration::from_millis(50));
     }
