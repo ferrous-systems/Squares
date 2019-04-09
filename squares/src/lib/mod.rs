@@ -10,6 +10,7 @@ use sdl2::VideoSubsystem;
 
 pub mod api;
 pub mod data;
+pub mod err;
 
 use data::{Grid, SharedGrid, RGB};
 
