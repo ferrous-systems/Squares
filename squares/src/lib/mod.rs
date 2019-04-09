@@ -70,7 +70,7 @@ pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid, nx
     let grid_data = sharedgrid_data.lock().expect("grid lock failed");
 
 
-    renderer.set_draw_color(Color::RGB(35, 15, 13));
+    renderer.set_draw_color(Color::RGB(0, 0, 0));
     renderer.clear();
 
     for row in 0..*ny_cells {
