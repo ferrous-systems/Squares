@@ -1,10 +1,11 @@
+use sdl2::video::{Window, WindowContext};
 use rand::Rng;
 
 use std::sync::{Arc, Mutex};
 
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::Renderer;
+use sdl2::render::Canvas;
 use sdl2::EventPump;
 use sdl2::VideoSubsystem;
 
@@ -50,7 +51,7 @@ pub fn random_rgb() -> u8 {
 }
 
 //converts row column values into xy pixels and draws rectangle in the specified color
-pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_data: &Grid) {
+pub fn display_cell(renderer: &mut Canvas<Window>, row: i32, col: i32, grid_data: &Grid) {
     //let sharedgrid_data = shared_grid.sharedgrid;
     //let grid_data = sharedgrid_data.lock().expect("grid lock failed");
     let grid = &grid_data.grid;
@@ -71,7 +72,7 @@ pub fn display_cell(renderer: &mut Renderer, row: i32, col: i32, grid_data: &Gri
 }
 
 //displays the whole grid by repeatedly calling display_cell on every cell
-pub fn display_frame(renderer: &mut Renderer, shared_grid: &SharedGrid) {
+pub fn display_frame(renderer: &mut Canvas<Window>, shared_grid: &SharedGrid) {
     let sharedgrid_data = &shared_grid.sharedgrid;
     let grid_data = sharedgrid_data.lock().expect("grid lock failed");
 
@@ -87,54 +88,78 @@ pub fn display_frame(renderer: &mut Renderer, shared_grid: &SharedGrid) {
     renderer.present();
 }
 
-pub fn next_color_is_random() -> Vec<Vec<RGB>> {
-    let mut new_grid_vector: Vec<Vec<RGB>> = Vec::new();
+// pub fn next_color_is_random() -> Vec<Vec<RGB>> {
+//     let mut new_grid_vector: Vec<Vec<RGB>> = Vec::new();
+//
+//     for i in 0..NCELLS {
+//         new_grid_vector.push(Vec::new());
+//         for _j in 0..NCELLS {
+//             let rgb = RGB {
+//                 red: random_rgb(),
+//                 green: random_rgb(),
+//                 blue: random_rgb(),
+//             };
+//             new_grid_vector[i as usize].push(rgb);
+//         }
+//     }
+//     new_grid_vector
+//}
 
-    for i in 0..NCELLS {
-        new_grid_vector.push(Vec::new());
-        for _j in 0..NCELLS {
-            let rgb = RGB {
-                red: random_rgb(),
-                green: random_rgb(),
-                blue: random_rgb(),
-            };
-            new_grid_vector[i as usize].push(rgb);
-        }
-    }
-    new_grid_vector
-}
+// pub fn init<'a>() -> (Renderer<'a>, EventPump) {
+//     let sdl_context = sdl2::init().expect("sdl init failed");
+//     let video_subsystem = sdl_context.video().expect("video subsystem failed");
+//
+//     let window = video_subsystem
+//         .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
+//         .position_centered()
+//         .opengl()
+//         .build()
+//         .expect("y");
+//
+//     let mut renderer = window.renderer().build().unwrap();
+//     let event_pump = sdl_context.event_pump().unwrap();
+//
+//     renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!
+//     renderer.clear();
+//     renderer.present();
+//
+//     (renderer, event_pump)
+// }
 
-pub fn init<'a>() -> (Renderer<'a>, EventPump, VideoSubsystem) {
-    let sdl_context = sdl2::init().expect("sdl init failed");
-    let video_subsystem = sdl_context.video().expect("video subsystem failed");
+pub fn new_init<'a>()-> (Canvas<Window>, EventPump) {
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
         .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
         .position_centered()
-        .opengl()
         .build()
-        .expect("y");
+        .unwrap();
 
-    let mut renderer = window.renderer().build().unwrap();
-    let event_pump = sdl_context.event_pump().unwrap();
+    let mut canvas = window.into_canvas()
+        //.target_texture()
+        .present_vsync()
+        .build()
+        .unwrap();
 
-    renderer.set_draw_color(Color::RGB(35, 15, 13)); //color does not change since being declared here!
-    renderer.clear();
-    renderer.present();
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
 
-    (renderer, event_pump, video_subsystem)
+    let mut event_pump = sdl_context.event_pump().unwrap();
+    (canvas, event_pump)
 }
 
-pub fn set_fullscreen<'a>(video_subsystem: &VideoSubsystem) -> Renderer<'a> {
-    let window = video_subsystem
-        .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
-        .position_centered()
-        .fullscreen_desktop()
-        .opengl()
-        .build()
-        .expect("156");
-
-    let renderer = window.renderer().build().expect("158");
-
-    renderer
-}
+// pub fn set_fullscreen<'a>(video_subsystem: &VideoSubsystem) -> Renderer<'a> {
+//     let window = video_subsystem
+//         .window("demo", MAX_X as u32 + 1, MAX_Y as u32 + 1)
+//         .position_centered()
+//         .fullscreen_desktop()
+//         .opengl()
+//         .build()
+//         .expect("156");
+//
+//     let renderer = window.renderer().build().expect("158");
+//
+//     renderer
+// }

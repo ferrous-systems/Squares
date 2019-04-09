@@ -9,6 +9,7 @@ extern crate serde_derive;
 extern crate rand;
 extern crate sdl2;
 
+use sdl2::video::FullscreenType::{self, Desktop, Off};
 use std::{thread, time};
 
 use rocket::State;
@@ -58,7 +59,7 @@ fn create(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
 }
 
 fn main() {
-    let (mut renderer, mut events, video_subsystem) = lib::init();
+    let (mut canvas, mut events) = lib::new_init();
     let shared_grid = lib::grid_init(lib::NCELLS);
     let sharedgrid_data = SharedGrid {
         sharedgrid: shared_grid.sharedgrid.clone()
@@ -78,16 +79,27 @@ fn main() {
     'running: loop {
         for event in events.poll_iter() {
             match event {
-                Event::KeyDown {
+                Event::Quit {..} | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
+                Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
 
-                _ => {}
+                    if canvas.window_mut().fullscreen_state() == FullscreenType::Off {
+                        canvas.window_mut().set_fullscreen(Desktop).unwrap();
+                        continue 'running
+
+                    } else {
+                        canvas.window_mut().set_fullscreen(Off).unwrap();
+                        continue 'running
+                    };
+                }
+
+                _ => continue 'running,
             }
         }
 
-        lib::display_frame(&mut renderer, &shared_grid);
+        lib::display_frame(&mut canvas, &shared_grid);
         thread::sleep(time::Duration::from_millis(50));
     }
 }
