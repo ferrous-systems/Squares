@@ -1,0 +1,12 @@
+[package]
+name = "squares_test"
+version = "0.1.0"
+authors = ["Mirabellensaft <tanks@ferrous-systems.com>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "*"
+structopt = "0.2"
+serde ="^1.0"
+serde_json ="^1.0"
+serde_derive ="^1.0"

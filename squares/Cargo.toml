@@ -1,0 +1,23 @@
+[package]
+name = "squares"
+version = "0.1.0"
+authors = ["Mirabellensaft <tanks@ferrous-systems.com>"]
+edition = "2018"
+
+[dependencies]
+sdl2 = "0.30.0"
+rand = "0.3.14"
+rocket = "0.4.0"
+rocket_codegen = "0.4.0"
+serde ="^1.0"
+serde_json ="^1.0"
+serde_derive ="^1.0"
+error-chain = "0.12.0"
+structopt = "0.2"
+
+
+
+[dependencies.rocket_contrib]
+version = "*"
+default-features = false
+features = ["json"]
