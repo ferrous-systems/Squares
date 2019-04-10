@@ -5,11 +5,11 @@ The program generates a grid in the size of your choice. The squares can be colo
 by sending a JSON object via POST requests containing the coordinates of the square
 in the grid as well as RGB values.
 
-# Requirements
+### Requirements
 - Rust nightly
 - sdl2 library
 
-# Usage
+### Usage
 - run with args: \<rows\> \<columns\>
 - toggle fullscreen: space
 - clear grid: return
@@ -19,7 +19,7 @@ in the grid as well as RGB values.
   - colors 0-255, row and column 1 - your specified maximum
   - cargo run \<row\> \<column\> \<red\> \<green\> \<blue\>
 
-# Squares_test
+### Squares_test
 Squares_test sends JSON objects to Squares, when running locally.
 - usage of squares_test:
 
