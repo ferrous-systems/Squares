@@ -1,3 +1,4 @@
+
 ## Squares - drawing squares from http requests
 
 The program generates a grid in the size of your choice. The squares can be colored
@@ -14,9 +15,9 @@ in the grid as well as RGB values.
 - clear grid: return
 - quit: esc
 
-- http requests:
-  - send to http://localhost:8000/cell
-  - required format of JSON object: {"row": i32,"column": i32,"red": u8,"green": u8,"blue": u8}
+- usage of squares_test:
+  - colors 0-255, row and column 1 - your specified maximum
+  - cargo run \<row\> \<column\> \<red\> \<green\> \<blue\>
 
 # Squares_test
 Squares_test sends JSON objects to Squares, when running locally.
