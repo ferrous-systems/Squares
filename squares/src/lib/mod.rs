@@ -152,23 +152,24 @@ pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32) {
 
     (width, height)
 }
-pub fn clear_grid(shared_grid: SharedGrid) {
+pub fn clear_grid(shared_grid: &SharedGrid) {
     println!("clearing grid");
+    
     let mut sharedgrid_data = shared_grid.sharedgrid.lock().expect("grid lock failed");
     let max_rows = &sharedgrid_data.grid.len();
     let max_columns = &sharedgrid_data.grid[0].len();
 
     for row in 0..*max_rows as i32 {
-        for _column in 0..*max_columns as i32 {
-            sharedgrid_data.grid[row as usize].push(RGB {
+        for column in 0..*max_columns as i32 {
+            sharedgrid_data.grid[row as usize][column as usize] = RGB {
                 red: 35_u8,
                 green: 15_u8,
                 blue: 13_u8,
-            });
+            };;
         }
     }
-
 }
+
 
 pub fn center_rect(res_width: i32, res_height: i32, canvas_width: i32, canvas_height: i32) -> Rect {
     let x = (res_width - canvas_width) / 2;
