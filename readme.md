@@ -1,4 +1,4 @@
-##Squares - drawing squares receiving http requests
+## Squares - drawing squares receiving http requests
 
 - requires nightly and sdl2
 - run with args: \<rows\> \<columns\>, numbers can't be bigger then screen resolution. No error handling yet, it doesn't crash, but it does't draw either.
