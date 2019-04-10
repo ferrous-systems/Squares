@@ -7,7 +7,7 @@
 
 - usage of squares_test:
   - colors 0-255, row and column 1 - your specified maximum
-  - cargo run \<row\> \<column\> \<red\> \<green\> <blue>
+  - cargo run \<row\> \<column\> \<red\> \<green\> \<blue\>
 
 - http requests:
   - send to http://localhost:8000/cell
