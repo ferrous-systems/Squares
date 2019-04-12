@@ -24,5 +24,5 @@ fn main() {
     );
 
     let client = reqwest::Client::new();
-    let res = client.post("http://localhost:8000/cell").json(&cell).send();
+    let _res = client.post("http://localhost:8000/cell").json(&cell).send();
 }
