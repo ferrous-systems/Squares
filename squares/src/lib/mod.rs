@@ -1,4 +1,3 @@
-use rand::Rng;
 use sdl2::video::Window;
 
 use std::sync::{Arc, Mutex};
@@ -37,11 +36,6 @@ pub fn grid_init(nx_cells: i32, ny_cells: i32) -> SharedGrid {
     };
 
     output_grid
-}
-
-pub fn random_rgb() -> u8 {
-    let mut rng = rand::thread_rng();
-    rng.gen_range(0, 255)
 }
 
 //converts row column values into xy pixels and draws rectangle in the specified color
@@ -107,22 +101,7 @@ pub fn toggle_fullscreen (canvas: &mut Canvas<Window>, canvas_width: i32, canvas
     };
 }
 
-// pub fn next_color_is_random() -> Vec<Vec<RGB>> {
-//     let mut new_grid_vector: Vec<Vec<RGB>> = Vec::new();
-//
-//     for i in 0..NCELLS {
-//         new_grid_vector.push(Vec::new());
-//         for _j in 0..NCELLS {
-//             let rgb = RGB {
-//                 red: random_rgb(),
-//                 green: random_rgb(),
-//                 blue: random_rgb(),
-//             };
-//             new_grid_vector[i as usize].push(rgb);
-//         }
-//     }
-//     new_grid_vector
-//}
+
 
 pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
