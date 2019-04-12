@@ -1,15 +1,15 @@
-
-## Squares - drawing squares from http requests
+![purple square logo](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/logo.png " ")
+# Squares - drawing squares from http requests
 
 The program generates a grid in the size of your choice. The squares can be colored
 by sending JSON objects via POST requests containing the coordinates of the square
 in the grid as well as RGB values.
 
-# Download
+## Download
   Get the zip file from [Ferrous Systems - Squares](https://github.com/ferrous-systems/Squares/archive/master.zip) or clone the repository from `git@github.com:ferrous-systems/Squares.git`.
 
 
-# Requirements
+## Requirements
   Rust nightly
   ```
   $ curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly
@@ -17,7 +17,7 @@ in the grid as well as RGB values.
   sdl2 library
   [SDL Wiki](https://wiki.libsdl.org/Installation)
 
-# Usage
+## Usage
 To run the program:
 ```
 YourDirectory/squares/squares cargo run <rows> <columns>
@@ -30,7 +30,7 @@ produces a grid with 4 rows and 6 columns:
 Inline-style:
 ![clear grid](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/1.png " ")
 
-# Controls
+## Controls
 
 - toggle fullscreen: space
 - clear grid: return
@@ -38,7 +38,7 @@ Inline-style:
 - toggle pause: b
 
 
-# How to color squares:
+## How to color squares:
 To color squares send POST requests of the following format:
 ```
 {"row":<i32>,"column":<i32>,"red":<u8>,"green":<u8>,"blue":<u8>}
@@ -63,8 +63,8 @@ YourDirectory/squares/squares_test cargo run 4 5 77 46 90
 ```
 Running this will change the color of the square in row 4 and column 5 to purple.
 ![pink square in row 3 and column 5 and purple square in row 5 and column 5](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/3.png " ")
-# Intervention
 
+## Intervention
 The program can be intervened by sending GET requests.
 
 ```
