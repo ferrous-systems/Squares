@@ -45,8 +45,7 @@ pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_p
     let max_rows = &sharedgrid_data.grid.len();
     let max_columns = &sharedgrid_data.grid[0].len();
 
-    //let grid = SharedGrid { sharedgrid: sharedgrid.sharedgrid};
-    //lib::clear_grid(&grid);
+
 
     if intervention {
 
@@ -88,7 +87,17 @@ pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_p
         program_paused.store(intervention, Ordering::Relaxed);
         json!("paused")
     } else {
-        //*program_paused.get_mut() = intervention;
+
+        for row in 0..*max_rows as i32 {
+            for column in 0..*max_columns as i32 {
+                sharedgrid_data.grid[row as usize][column as usize] = RGB {
+                    red: 35_u8,
+                    green: 15_u8,
+                    blue: 13_u8,
+                };
+            }
+        }
+        thread::sleep(time::Duration::from_millis(50));
         program_paused.store(intervention, Ordering::Relaxed);
         json!("unpaused")
     }
