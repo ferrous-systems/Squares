@@ -1,4 +1,3 @@
-use rand::Rng;
 use sdl2::video::Window;
 
 use std::sync::{Arc, Mutex};
@@ -6,14 +5,15 @@ use std::sync::{Arc, Mutex};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
-use sdl2::EventPump;
 use sdl2::video::FullscreenType::{self, Desktop, Off};
+use sdl2::EventPump;
 
 pub mod api;
 pub mod data;
 pub mod err;
+pub mod requests;
 
-use data::{Grid, SharedGrid, RGB};
+use data::{Grid, SharedGrid, RGB, ScreenResolution};
 
 //creates a grid with ncells*ncells initialized with cell in a color
 pub fn grid_init(nx_cells: i32, ny_cells: i32) -> SharedGrid {
@@ -36,11 +36,6 @@ pub fn grid_init(nx_cells: i32, ny_cells: i32) -> SharedGrid {
     };
 
     output_grid
-}
-
-pub fn random_rgb() -> u8 {
-    let mut rng = rand::thread_rng();
-    rng.gen_range(0, 255)
 }
 
 //converts row column values into xy pixels and draws rectangle in the specified color
@@ -91,14 +86,18 @@ pub fn display_frame(
     renderer.present();
 }
 
-pub fn toggle_fullscreen (canvas: &mut Canvas<Window>, canvas_width: i32, canvas_height: i32) {
-
+pub fn toggle_fullscreen(canvas: &mut Canvas<Window>, canvas_width: i32, canvas_height: i32) {
     if canvas.window_mut().fullscreen_state() == FullscreenType::Off {
         canvas.window_mut().set_fullscreen(Desktop).unwrap();
 
         //change viewport for fullscreen
         let screen_resolution = get_screen_resolution(canvas);
-        let center_rect = center_rect(screen_resolution.0, screen_resolution.1, canvas_width, canvas_height);
+        let center_rect = center_rect(
+            screen_resolution.w,
+            screen_resolution.h,
+            canvas_width,
+            canvas_height,
+        );
 
         canvas.set_viewport(center_rect);
     } else {
@@ -106,29 +105,12 @@ pub fn toggle_fullscreen (canvas: &mut Canvas<Window>, canvas_width: i32, canvas
     };
 }
 
-// pub fn next_color_is_random() -> Vec<Vec<RGB>> {
-//     let mut new_grid_vector: Vec<Vec<RGB>> = Vec::new();
-//
-//     for i in 0..NCELLS {
-//         new_grid_vector.push(Vec::new());
-//         for _j in 0..NCELLS {
-//             let rgb = RGB {
-//                 red: random_rgb(),
-//                 green: random_rgb(),
-//                 blue: random_rgb(),
-//             };
-//             new_grid_vector[i as usize].push(rgb);
-//         }
-//     }
-//     new_grid_vector
-//}
-
 pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("demo", x as u32 + 1, y as u32 + 1)
+        .window("Squares", x as u32 + 1, y as u32 + 1)
         .position_centered()
         .build()
         .unwrap();
@@ -143,18 +125,23 @@ pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     (canvas, event_pump)
 }
 
-pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32) {
+pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> ScreenResolution {
     let window = canvas.window_mut();
     let video_subsystem = window.subsystem();
     let display_mode = video_subsystem.current_display_mode(0).unwrap();
     let width = display_mode.w;
     let height = display_mode.h;
 
-    (width, height)
+    let screen_resolution = ScreenResolution {
+        w: width,
+        h: height,
+    };
+    screen_resolution
 }
+
 pub fn clear_grid(shared_grid: &SharedGrid) {
     println!("clearing grid");
-    
+
     let mut sharedgrid_data = shared_grid.sharedgrid.lock().expect("grid lock failed");
     let max_rows = &sharedgrid_data.grid.len();
     let max_columns = &sharedgrid_data.grid[0].len();
@@ -165,11 +152,42 @@ pub fn clear_grid(shared_grid: &SharedGrid) {
                 red: 35_u8,
                 green: 15_u8,
                 blue: 13_u8,
-            };;
+            };
         }
     }
 }
 
+pub fn make_checker_board(shared_grid: &SharedGrid) {
+    println!("clearing grid");
+
+    let mut sharedgrid_data = shared_grid.sharedgrid.lock().expect("grid lock failed");
+    let max_rows = &sharedgrid_data.grid.len();
+    let max_columns = &sharedgrid_data.grid[0].len();
+
+    for row in 0..*max_rows as i32 {
+        if row % 2 == 0 {
+            for column in 0..*max_columns as i32 {
+                if column % 2 == 0 {
+                    sharedgrid_data.grid[row as usize][column as usize] = RGB {
+                        red: 255,
+                        green: 255,
+                        blue: 255,
+                    };
+                }
+            }
+        } else {
+            for column in 0..*max_columns as i32 {
+                if column % 2 == 1 {
+                    sharedgrid_data.grid[row as usize][column as usize] = RGB {
+                        red: 255,
+                        green: 255,
+                        blue: 255,
+                    };
+                }
+            }
+        }
+    }
+}
 
 pub fn center_rect(res_width: i32, res_height: i32, canvas_width: i32, canvas_height: i32) -> Rect {
     let x = (res_width - canvas_width) / 2;
@@ -184,12 +202,12 @@ pub fn determine_canvas_size(nx_cells: i32, ny_cells: i32) -> (i32, i32, i32) {
     let screen_resolution = get_screen_resolution(&mut canvas);
 
     if nx_cells == ny_cells {
-        let canvas_height = screen_resolution.1 - 200;
+        let canvas_height = screen_resolution.h - 200;
         let canvas_width = canvas_height;
         let cell_width = canvas_height / ny_cells;
         (canvas_width, canvas_height, cell_width)
     } else {
-        let canvas_height = screen_resolution.1 - 200;
+        let canvas_height = screen_resolution.h - 200;
         let cell_width = canvas_height / ny_cells;
         let canvas_width = cell_width * nx_cells;
         (canvas_width, canvas_height, cell_width)
