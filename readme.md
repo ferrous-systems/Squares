@@ -28,7 +28,7 @@ YourDirectory/squares/squares cargo run 4 6
 ```
 produces a grid with 4 rows and 6 columns:
 Inline-style:
-![clear grid](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/1.png " ")
+![clear grid](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/5.png " ")
 
 ## Controls
 
