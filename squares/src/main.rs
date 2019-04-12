@@ -10,13 +10,15 @@ extern crate rand;
 extern crate sdl2;
 
 use std::{thread, time};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 pub mod lib;
 
-use lib::data::SharedGrid;
+use lib::data::{SharedGrid, ProgramState};
 use lib::requests;
 
 use structopt::StructOpt;
@@ -31,6 +33,9 @@ struct CommandLineArgs {
 fn main() {
 
     let args = CommandLineArgs::from_args();
+    let program_paused = ProgramState{ 0: Arc::new(Mutex::new(false))};
+    let program_paused_intervention = program_paused.0.clone();
+
 
     //init video loop
     let (canvas_width, canvas_height, cell_width) = lib::determine_canvas_size(args.columns, args.rows);
@@ -43,13 +48,14 @@ fn main() {
     };
 
 
-    thread::spawn(|| {
+    thread::spawn( || {
         //http requests
         //if no data is comming over http, init color is drawn
         rocket::ignite()
             .mount("/cell", routes![requests::change_grid])
             .mount("/", routes![requests::intervention])
             .manage(sharedgrid_rocket)
+            .manage(program_paused_intervention)
             .launch();
     });
 
@@ -78,18 +84,27 @@ fn main() {
                     continue 'running;
                 }
 
-                // Event::KeyDown { keycode: Some(Keycode::B),
-                //     ..
-                // } => {
-                //     lib::pause(&mut sharedgrid_loop);
-                //     continue 'running;
-                // }
+                Event::KeyDown { keycode: Some(Keycode::B),
+                    ..
+                } => {
+                    if program_paused.load(Ordering::Relaxed) == false {
+                        program_paused.store(true, Ordering::Relaxed);
+                        println!("paused");
+                    } else {
+                        program_paused.store(false, Ordering::Relaxed);
+                        println!("unpaused");
+                    }
+                    continue 'running;
+                }
 
                 _ => continue 'running,
             }
         }
 
-        lib::display_frame(&mut canvas, &sharedgrid_loop, &args.columns, &args.rows, &cell_width);
-        thread::sleep(time::Duration::from_millis(50));
+        while program_paused.load(Ordering::Relaxed) == false {
+            lib::display_frame(&mut canvas, &sharedgrid_loop, &args.columns, &args.rows, &cell_width);
+            thread::sleep(time::Duration::from_millis(50));
+        }
+
     }
 }

@@ -16,6 +16,8 @@ pub struct SharedGrid {
     pub sharedgrid: Arc<Mutex<Grid>>,
 }
 
+pub struct ProgramState (pub Arc<Mutex<bool>>);
+
 pub struct DisplayProperties {
     pub canvas: Canvas<Window>,
     pub rows: i32,
