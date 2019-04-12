@@ -18,7 +18,7 @@ use sdl2::keyboard::Keycode;
 
 pub mod lib;
 
-use lib::data::{SharedGrid, ProgramState};
+use lib::data::SharedGrid;
 use lib::requests;
 
 use structopt::StructOpt;
@@ -33,9 +33,8 @@ struct CommandLineArgs {
 fn main() {
 
     let args = CommandLineArgs::from_args();
-    let program_paused = ProgramState{ 0: Arc::new(Mutex::new(false))};
-    let program_paused_intervention = program_paused.0.clone();
-
+    let program_paused = Arc::new(AtomicBool::new(false));
+    let program_paused_state = program_paused.clone();
 
     //init video loop
     let (canvas_width, canvas_height, cell_width) = lib::determine_canvas_size(args.columns, args.rows);
@@ -48,14 +47,14 @@ fn main() {
     };
 
 
-    thread::spawn( || {
+    thread::spawn(|| {
         //http requests
         //if no data is comming over http, init color is drawn
         rocket::ignite()
             .mount("/cell", routes![requests::change_grid])
             .mount("/", routes![requests::intervention])
             .manage(sharedgrid_rocket)
-            .manage(program_paused_intervention)
+            .manage(program_paused_state)
             .launch();
     });
 
@@ -88,6 +87,7 @@ fn main() {
                     ..
                 } => {
                     if program_paused.load(Ordering::Relaxed) == false {
+                        //*program_paused.get_mut() = true;
                         program_paused.store(true, Ordering::Relaxed);
                         println!("paused");
                     } else {
@@ -101,7 +101,7 @@ fn main() {
             }
         }
 
-        while program_paused.load(Ordering::Relaxed) == false {
+        if program_paused.load(Ordering::Relaxed) == false {
             lib::display_frame(&mut canvas, &sharedgrid_loop, &args.columns, &args.rows, &cell_width);
             thread::sleep(time::Duration::from_millis(50));
         }

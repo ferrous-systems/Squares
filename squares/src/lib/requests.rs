@@ -1,5 +1,6 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::{thread, time};
 
 use rocket::State;
 use rocket_contrib::json;
@@ -7,7 +8,7 @@ use rocket_contrib::json::{Json, JsonValue};
 
 use crate::lib;
 use lib::api::Cell;
-use lib::data::{SharedGrid, RGB, ProgramState};
+use lib::data::{SharedGrid, RGB};
 
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
@@ -39,7 +40,7 @@ pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue
 }
 
 #[get("/intervention/<intervention>")]
-pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_state: State<ProgramState>) -> JsonValue {
+pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_paused: State<Arc<AtomicBool>>) -> JsonValue {
     let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
     let max_rows = &sharedgrid_data.grid.len();
     let max_columns = &sharedgrid_data.grid[0].len();
@@ -83,14 +84,12 @@ pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_s
                 }
             }
         }
-
-        let mut _s = program_state.0.lock().unwrap();
-        let _f = *_s;
-        _f = intervention;
-        //.store(intervention, Ordering::Relaxed);
+        thread::sleep(time::Duration::from_millis(100));
+        program_paused.store(intervention, Ordering::Relaxed);
         json!("paused")
     } else {
-        program_state.inner().store(intervention, Ordering::Relaxed);
+        //*program_paused.get_mut() = intervention;
+        program_paused.store(intervention, Ordering::Relaxed);
         json!("unpaused")
     }
 }
