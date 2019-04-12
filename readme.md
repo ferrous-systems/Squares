@@ -1,5 +1,5 @@
 ![purple square logo](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/logo.png " ")
-# Squares - drawing squares from http requests
+# Squares - coloring squares from http requests
 
 The program generates a grid in the size of your choice. The squares can be colored
 by sending JSON objects via POST requests containing the coordinates of the square
