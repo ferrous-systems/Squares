@@ -1,6 +1,6 @@
-use std::sync::{Arc, Mutex};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use std::sync::{Arc, Mutex};
 
 pub struct Grid {
     pub grid: Vec<Vec<RGB>>,

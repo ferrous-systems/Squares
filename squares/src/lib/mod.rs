@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
-use sdl2::EventPump;
 use sdl2::video::FullscreenType::{self, Desktop, Off};
+use sdl2::EventPump;
 
 pub mod api;
 pub mod data;
@@ -86,22 +86,24 @@ pub fn display_frame(
     renderer.present();
 }
 
-pub fn toggle_fullscreen (canvas: &mut Canvas<Window>, canvas_width: i32, canvas_height: i32) {
-
+pub fn toggle_fullscreen(canvas: &mut Canvas<Window>, canvas_width: i32, canvas_height: i32) {
     if canvas.window_mut().fullscreen_state() == FullscreenType::Off {
         canvas.window_mut().set_fullscreen(Desktop).unwrap();
 
         //change viewport for fullscreen
         let screen_resolution = get_screen_resolution(canvas);
-        let center_rect = center_rect(screen_resolution.0, screen_resolution.1, canvas_width, canvas_height);
+        let center_rect = center_rect(
+            screen_resolution.0,
+            screen_resolution.1,
+            canvas_width,
+            canvas_height,
+        );
 
         canvas.set_viewport(center_rect);
     } else {
         canvas.window_mut().set_fullscreen(Off).unwrap();
     };
 }
-
-
 
 pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     let sdl_context = sdl2::init().unwrap();
@@ -170,7 +172,6 @@ pub fn make_checker_board(shared_grid: &SharedGrid) {
                 }
             }
         } else {
-
             for column in 0..*max_columns as i32 {
                 if column % 2 == 1 {
                     sharedgrid_data.grid[row as usize][column as usize] = RGB {

@@ -8,9 +8,9 @@ extern crate serde_derive;
 extern crate error_chain;
 extern crate sdl2;
 
-use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::{thread, time};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -30,13 +30,13 @@ struct CommandLineArgs {
 }
 
 fn main() {
-
     let args = CommandLineArgs::from_args();
     let program_paused = Arc::new(AtomicBool::new(false));
     let program_paused_state = program_paused.clone();
 
     //init video loop
-    let (canvas_width, canvas_height, cell_width) = lib::determine_canvas_size(args.columns, args.rows);
+    let (canvas_width, canvas_height, cell_width) =
+        lib::determine_canvas_size(args.columns, args.rows);
 
     let (mut canvas, mut events) = lib::init(canvas_width, canvas_height);
 
@@ -44,7 +44,6 @@ fn main() {
     let sharedgrid_rocket = SharedGrid {
         sharedgrid: shared_grid.sharedgrid.clone(),
     };
-
 
     thread::spawn(|| {
         //http requests
@@ -65,24 +64,28 @@ fn main() {
         //
         for event in events.poll_iter() {
             match event {
-                Event::Quit { .. } | Event::KeyDown { keycode: Some(Keycode::Escape),
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
-                Event::KeyDown { keycode: Some(Keycode::Space),
+                Event::KeyDown {
+                    keycode: Some(Keycode::Space),
                     ..
                 } => {
-
                     lib::toggle_fullscreen(&mut canvas, canvas_width, canvas_height);
                     continue 'running;
                 }
-                Event::KeyDown { keycode: Some(Keycode::Return),
+                Event::KeyDown {
+                    keycode: Some(Keycode::Return),
                     ..
                 } => {
                     lib::clear_grid(&mut sharedgrid_loop);
                     continue 'running;
                 }
 
-                Event::KeyDown { keycode: Some(Keycode::B),
+                Event::KeyDown {
+                    keycode: Some(Keycode::B),
                     ..
                 } => {
                     if program_paused.load(Ordering::Relaxed) == false {
@@ -100,9 +103,14 @@ fn main() {
         }
 
         if program_paused.load(Ordering::Relaxed) == false {
-            lib::display_frame(&mut canvas, &sharedgrid_loop, &args.columns, &args.rows, &cell_width);
+            lib::display_frame(
+                &mut canvas,
+                &sharedgrid_loop,
+                &args.columns,
+                &args.rows,
+                &cell_width,
+            );
             thread::sleep(time::Duration::from_millis(50));
         }
-
     }
 }

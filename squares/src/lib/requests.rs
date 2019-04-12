@@ -13,7 +13,6 @@ use lib::data::{SharedGrid, RGB};
 //get cell information via http, push rgb values in grid
 #[post("/", data = "<cell>")]
 pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
-
     let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
     let max_rows = &sharedgrid_data.grid.len();
     let max_columns = &sharedgrid_data.grid[0].len();
@@ -28,7 +27,7 @@ pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue
                 blue: cell.blue,
             };
 
-            sharedgrid_data.grid[(cell.row - 1)as usize][(cell.column - 1) as usize] = color_arr;
+            sharedgrid_data.grid[(cell.row - 1) as usize][(cell.column - 1) as usize] = color_arr;
             json!("success")
         }
 
@@ -40,12 +39,14 @@ pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue
 }
 
 #[get("/intervention/<intervention>")]
-pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_paused: State<Arc<AtomicBool>>) -> JsonValue {
-
+pub fn intervention(
+    intervention: bool,
+    sharedgrid: State<SharedGrid>,
+    program_paused: State<Arc<AtomicBool>>,
+) -> JsonValue {
     lib::clear_grid(&sharedgrid);
 
     if intervention {
-
         lib::make_checker_board(&sharedgrid);
 
         thread::sleep(time::Duration::from_millis(100));
