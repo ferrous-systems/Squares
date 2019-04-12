@@ -16,6 +16,11 @@ pub struct SharedGrid {
     pub sharedgrid: Arc<Mutex<Grid>>,
 }
 
+pub struct ScreenResolution {
+    pub w: i32,
+    pub h: i32,
+}
+
 pub struct DisplayProperties {
     pub canvas: Canvas<Window>,
     pub rows: i32,

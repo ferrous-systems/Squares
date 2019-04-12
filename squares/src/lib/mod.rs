@@ -13,7 +13,7 @@ pub mod data;
 pub mod err;
 pub mod requests;
 
-use data::{Grid, SharedGrid, RGB};
+use data::{Grid, SharedGrid, RGB, ScreenResolution};
 
 //creates a grid with ncells*ncells initialized with cell in a color
 pub fn grid_init(nx_cells: i32, ny_cells: i32) -> SharedGrid {
@@ -93,8 +93,8 @@ pub fn toggle_fullscreen(canvas: &mut Canvas<Window>, canvas_width: i32, canvas_
         //change viewport for fullscreen
         let screen_resolution = get_screen_resolution(canvas);
         let center_rect = center_rect(
-            screen_resolution.0,
-            screen_resolution.1,
+            screen_resolution.w,
+            screen_resolution.h,
             canvas_width,
             canvas_height,
         );
@@ -125,14 +125,18 @@ pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     (canvas, event_pump)
 }
 
-pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> (i32, i32) {
+pub fn get_screen_resolution(canvas: &mut Canvas<Window>) -> ScreenResolution {
     let window = canvas.window_mut();
     let video_subsystem = window.subsystem();
     let display_mode = video_subsystem.current_display_mode(0).unwrap();
     let width = display_mode.w;
     let height = display_mode.h;
 
-    (width, height)
+    let screen_resolution = ScreenResolution {
+        w: width,
+        h: height,
+    };
+    screen_resolution
 }
 
 pub fn clear_grid(shared_grid: &SharedGrid) {
@@ -198,12 +202,12 @@ pub fn determine_canvas_size(nx_cells: i32, ny_cells: i32) -> (i32, i32, i32) {
     let screen_resolution = get_screen_resolution(&mut canvas);
 
     if nx_cells == ny_cells {
-        let canvas_height = screen_resolution.1 - 200;
+        let canvas_height = screen_resolution.h - 200;
         let canvas_width = canvas_height;
         let cell_width = canvas_height / ny_cells;
         (canvas_width, canvas_height, cell_width)
     } else {
-        let canvas_height = screen_resolution.1 - 200;
+        let canvas_height = screen_resolution.h - 200;
         let cell_width = canvas_height / ny_cells;
         let canvas_width = cell_width * nx_cells;
         (canvas_width, canvas_height, cell_width)
