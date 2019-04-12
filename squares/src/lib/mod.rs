@@ -129,7 +129,7 @@ pub fn init<'a>(x: i32, y: i32) -> (Canvas<Window>, EventPump) {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("demo", x as u32 + 1, y as u32 + 1)
+        .window("Squares", x as u32 + 1, y as u32 + 1)
         .position_centered()
         .build()
         .unwrap();
@@ -168,6 +168,39 @@ pub fn clear_grid(shared_grid: &SharedGrid) {
                 green: 15_u8,
                 blue: 13_u8,
             };
+        }
+    }
+}
+
+pub fn make_checker_board(shared_grid: &SharedGrid) {
+    println!("clearing grid");
+
+    let mut sharedgrid_data = shared_grid.sharedgrid.lock().expect("grid lock failed");
+    let max_rows = &sharedgrid_data.grid.len();
+    let max_columns = &sharedgrid_data.grid[0].len();
+
+    for row in 0..*max_rows as i32 {
+        if row % 2 == 0 {
+            for column in 0..*max_columns as i32 {
+                if column % 2 == 0 {
+                    sharedgrid_data.grid[row as usize][column as usize] = RGB {
+                        red: 255,
+                        green: 255,
+                        blue: 255,
+                    };
+                }
+            }
+        } else {
+
+            for column in 0..*max_columns as i32 {
+                if column % 2 == 1 {
+                    sharedgrid_data.grid[row as usize][column as usize] = RGB {
+                        red: 255,
+                        green: 255,
+                        blue: 255,
+                    };
+                }
+            }
         }
     }
 }

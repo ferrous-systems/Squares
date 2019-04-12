@@ -1,5 +1,5 @@
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::{thread, time};
 
 use rocket::State;
@@ -41,62 +41,17 @@ pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue
 
 #[get("/intervention/<intervention>")]
 pub fn intervention(intervention: bool, sharedgrid: State<SharedGrid>, program_paused: State<Arc<AtomicBool>>) -> JsonValue {
-    let mut sharedgrid_data = sharedgrid.sharedgrid.lock().expect("grid lock failed");
-    let max_rows = &sharedgrid_data.grid.len();
-    let max_columns = &sharedgrid_data.grid[0].len();
 
-
+    lib::clear_grid(&sharedgrid);
 
     if intervention {
 
-        for row in 0..*max_rows as i32 {
-            for column in 0..*max_columns as i32 {
-                sharedgrid_data.grid[row as usize][column as usize] = RGB {
-                    red: 35_u8,
-                    green: 15_u8,
-                    blue: 13_u8,
-                };
-            }
-        }
+        lib::make_checker_board(&sharedgrid);
 
-        for row in 0..*max_rows as i32 {
-            if row % 2 == 0 {
-                for column in 0..*max_columns as i32 {
-                    if column % 2 == 0 {
-                        sharedgrid_data.grid[row as usize][column as usize] = RGB {
-                            red: 255,
-                            green: 255,
-                            blue: 255,
-                        };
-                    }
-                }
-            } else {
-
-                for column in 0..*max_columns as i32 {
-                    if column % 2 == 1 {
-                        sharedgrid_data.grid[row as usize][column as usize] = RGB {
-                            red: 255,
-                            green: 255,
-                            blue: 255,
-                        };
-                    }
-                }
-            }
-        }
         thread::sleep(time::Duration::from_millis(100));
         program_paused.store(intervention, Ordering::Relaxed);
         json!("paused")
     } else {
-
-        for row in 0..*max_rows as i32 {
-            for column in 0..*max_columns as i32 {
-                sharedgrid_data.grid[row as usize][column as usize] = RGB {
-                    red: 35_u8,
-                    green: 15_u8,
-                    blue: 13_u8,
-                };
-            }
-        }
         thread::sleep(time::Duration::from_millis(50));
         program_paused.store(intervention, Ordering::Relaxed);
         json!("unpaused")
