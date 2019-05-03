@@ -26,8 +26,8 @@ pub fn change_grid(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue
                 green: cell.green,
                 blue: cell.blue,
             };
-
-            sharedgrid_data.grid[(cell.row - 1) as usize][(cell.column - 1) as usize] = color_arr;
+            //del -1
+            sharedgrid_data.grid[(cell.row) as usize][(cell.column) as usize] = color_arr;
             json!("success")
         }
 
