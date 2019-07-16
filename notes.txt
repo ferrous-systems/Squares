@@ -1,0 +1,29 @@
+speak slower
+comments in code why string
+separate time when you talk from time when people work
+
+cheat sheet!!
+
+
+
+write names of instructors on board
+
+the amount the instructor talks is not the amount students learn
+time students spend on task is the measurement
+
+people ask broad questions, if they are too general keep an eye on everyone else, if there are more urgent problems.
+take breaks in breaks
+
+### segment 2:
+
+ask people to provide some approaches -> more interactive, knowledge flows from experienced to inexperienced people
+
+### room setup
+move desks so that instuctors can move between rows more comfortable
+have a bunch of pens and paper ready
+
+
+### FAQ:
+
+serial output. how does it work. put in first session. maybe more elaborate output, errors?
+USB cable connection
