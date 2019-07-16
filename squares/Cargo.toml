@@ -1,6 +1,6 @@
 [package]
 name = "squares"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Mirabellensaft <tanks@ferrous-systems.com>"]
 edition = "2018"
 
