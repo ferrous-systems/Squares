@@ -34,7 +34,7 @@ produces a grid with 4 rows and 6 columns:
 - toggle fullscreen: space
 - clear grid: return
 - quit: esc
-- toggle pause: b
+- toggle pause: B
 
 
 ## How to color squares:
@@ -47,18 +47,20 @@ Allowed values:
 - row and column: 1 - your specified maximum
 
 Example with curl:
+
 ```
 curl --request POST --data '{"row":2,"column":4,"red":250,"green":68,"blue":199}' http://localhost:8000/cell
 ```
+
 Running this will change the color of the square in row 2 and column 4 to pink.
 ![pink square in row 2 and column 4](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/2.png " ")
 
 Example with squares_test (only on localhost):
 ```
-YourDirectory/squares/squares_test cargo run <row> <column> <red> <green> <blue>
+$YourDirectory/squares/squares_test cargo run <row> <column> <red> <green> <blue>
 ```
 ```
-YourDirectory/squares/squares_test cargo run 3 4 77 46 90
+$YourDirectory/squares/squares_test cargo run 3 4 77 46 90
 ```
 Running this will change the color of the square in row 3 and column 4 to purple.
 ![pink square in row 2 and column 4 and purple square in row 3 and column 4](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/3.png " ")
@@ -76,4 +78,6 @@ Sending a GET request containing `true` will pause the animation with a checker 
 
 ![checker board](https://github.com/ferrous-systems/Squares/blob/wip/example%20images/4.png " ")
 
+
 This can be used to signal viewers that something else will happen on the screen, or to just reset the grid. Hitting `b` on the computer, the program is running on,  will pause the animation without clearing the screen. Hitting `return` will clear the screen without pausing the animation.  
+
