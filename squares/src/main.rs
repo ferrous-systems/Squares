@@ -49,7 +49,9 @@ fn main() {
         //http requests
         //if no data is comming over http, init color is drawn
         rocket::ignite()
-            .mount("/cell", routes![requests::change_grid])
+            .mount("/grid", routes![requests::new_grid])
+            .mount("/cell", routes![requests::add_cell])
+            .mount("/line", routes![requests::add_line])
             .mount("/", routes![requests::intervention])
             .manage(sharedgrid_rocket)
             .manage(program_paused_state)
