@@ -20,54 +20,41 @@ pub fn new_grid(grid: Json<ApiGrid>, sharedgrid: State<SharedGrid>) -> JsonValue
 
     let api_grid = &grid.api_grid;
 
-    //checks values
-    let values = lib::err::does_grid_fit(&grid, max_rows, max_columns);
-    match values {
-        Ok(()) => {
-            println!("test1");
-            for (i, row) in api_grid.iter().enumerate() {
-                for (j, _column) in row.iter().enumerate() {
+    for (i, row) in api_grid.iter().enumerate() {
+        for (j, _column) in row.iter().enumerate() {
 
-                    let cell = Cell {
-                        row: i as i32 + grid.zero_row ,
-                        column: j as i32 + grid.zero_column,
-                        red: api_grid[i][j].red,
-                        green: api_grid[i][j].green,
-                        blue: api_grid[i][j].blue,
+            let cell = Cell {
+                row: i as i32 + grid.zero_row ,
+                column: j as i32 + grid.zero_column,
+                red: api_grid[i][j].red,
+                green: api_grid[i][j].green,
+                blue: api_grid[i][j].blue,
+            };
+
+            let values = lib::err::is_cell_value_in_range(&cell, max_rows, max_columns);
+            match values {
+                Ok(()) => {
+                    let color_arr = RGB {
+                        red: cell.red,
+                        green: cell.green,
+                        blue: cell.blue,
                     };
 
-                    let values = lib::err::is_value_in_range(&cell, max_rows, max_columns);
-                    match values {
-                        Ok(()) => {
-                            let color_arr = RGB {
-                                red: cell.red,
-                                green: cell.green,
-                                blue: cell.blue,
-                            };
-                            println!("{}", color_arr.blue);
-                            sharedgrid_data.grid[(cell.row) as usize][(cell.column) as usize] = color_arr;
-                        }
+                    sharedgrid_data.grid[(cell.row) as usize][(cell.column) as usize] = color_arr;
+                    json!("success");
+                }
 
-                        Err(error) => {
-                            let response = error.to_string();
-                            json!(response);
-                        }
-                    }
-
-
-
+                Err(error) => {
+                    let response = error.to_string();
+                    // println!("{}", &response);
+                    json!(response);
                 }
             }
-
-
-            json!("success")
-        }
-
-        Err(error) => {
-            let response = error.to_string();
-            json!(response)
         }
     }
+
+    json!("")
+
 }
 
 
@@ -89,7 +76,7 @@ pub fn add_cell(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
     };
 
     //checks values
-    let values = lib::err::is_value_in_range(&new_cell, max_rows, max_columns);
+    let values = lib::err::is_cell_value_in_range(&new_cell, max_rows, max_columns);
     match values {
         Ok(()) => {
             let color_arr = RGB {
@@ -104,6 +91,7 @@ pub fn add_cell(cell: Json<Cell>, sharedgrid: State<SharedGrid>) -> JsonValue {
 
         Err(error) => {
             let response = error.to_string();
+            // println!("{}", &response);
             json!(response)
         }
     }
@@ -155,6 +143,7 @@ pub fn add_line(line: Json<Line>, sharedgrid: State<SharedGrid>) -> JsonValue {
 
         Err(error) => {
             let response = error.to_string();
+            // println!("{}", &response);
             json!(response)
         }
     }

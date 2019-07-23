@@ -22,7 +22,7 @@ pub struct Line {
 pub struct ApiGrid {
     pub zero_row: i32,
     pub zero_column: i32,
-    pub api_grid: Vec<Vec<RGB>>,
+    pub api_grid: [[RGB; 8]; 8],
 }
 
 #[derive(Serialize, Deserialize)]
