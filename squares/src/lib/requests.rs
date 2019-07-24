@@ -112,32 +112,72 @@ pub fn add_line(line: Json<Line>, sharedgrid: State<SharedGrid>) -> JsonValue {
         Ok(()) => {
 
             if line.direction == 1 {
-                println!("test1");
+                //println!("test1");
                 for j in line.row..(line.row + line.length) {
-                    let color_arr = RGB {
+
+                    let line_cell = Cell {
+                        row: j,
+                        column: line.column,
                         red: line.red,
                         green: line.green,
                         blue: line.blue,
                     };
 
-                    sharedgrid_data.grid[j as usize][line.column as usize] = color_arr;
+                    //checks values
+                    let values = lib::err::is_cell_value_in_range(&line_cell, max_rows, max_columns);
+                    match values {
+                        Ok(()) => {
+
+                            let color_arr = RGB {
+                                red: line.red,
+                                green: line.green,
+                                blue: line.blue,
+                            };
+
+                            sharedgrid_data.grid[j as usize][line.column as usize] = color_arr;
+
+                        }
+                        Err(error) => {
+                            let response = error.to_string();
+                            // println!("{}", &response);
+                            json!(response);
+                        }
+                    }
                 }
 
             } else {
-                println!("test2");
+                //println!("test2");
                 for j in line.column..(line.column + line.length) {
-                    let color_arr = RGB {
+
+                    let line_cell = Cell {
+                        row: line.row,
+                        column: j,
                         red: line.red,
                         green: line.green,
                         blue: line.blue,
                     };
 
-                    sharedgrid_data.grid[line.row as usize][j as usize] = color_arr;
+                    //checks values
+                    let values = lib::err::is_cell_value_in_range(&line_cell, max_rows, max_columns);
+                    match values {
+                        Ok(()) => {
+
+                            let color_arr = RGB {
+                                red: line.red,
+                                green: line.green,
+                                blue: line.blue,
+                            };
+
+                            sharedgrid_data.grid[line.row as usize][j as usize] = color_arr;
+                        }
+                        Err(error) => {
+                            let response = error.to_string();
+                            // println!("{}", &response);
+                            json!(response);
+                        }
+                    }
                 }
-
             }
-
-
             json!("success")
         }
 
