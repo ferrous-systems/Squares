@@ -1,9 +1,7 @@
 ![purple square logo](https://github.com/ferrous-systems/Squares/blob/master/example%20images/logo.png " ")
 # Squares - coloring squares from http requests
 
-The program generates a grid in the size of your choice. The squares can be colored
-by sending JSON objects via POST requests containing the coordinates of the square
-in the grid as well as RGB values.
+The program generates a grid in the size of your choice. There are several ways to color the cells of the grid: coloring single cells, lines of cells or 8x8 grids of squares. The program accepts JSON objects via POST requests. 
 
 The easiest way to get JSON objects is to write a program that serialises the data
 structures found in the protocol section.
@@ -21,6 +19,7 @@ structures found in the protocol section.
   sdl2 library
   [SDL Wiki](https://wiki.libsdl.org/Installation)
 
+
 ## Usage
 To run the program:
 ```
@@ -33,6 +32,7 @@ $YourDirectory/squares/squares cargo run 4 6
 produces a grid with 4 rows and 6 columns:
 ![clear grid](https://github.com/ferrous-systems/Squares/blob/master/example%20images/5.png " ")
 
+
 ## Controls
 - toggle fullscreen: space
 - clear grid: return
@@ -40,8 +40,8 @@ produces a grid with 4 rows and 6 columns:
 - toggle pause: B
 
 
-## How to color pixels:
-To color squares send POST requests of the following format to hostname/cell:
+## How to color single cells:
+To color single cells send POST requests of the following format to hostname/cell:
 ```
 {"row":<i32>,"column":<i32>,"red":<u8>,"green":<u8>,"blue":<u8>}
 ```
@@ -55,8 +55,8 @@ Allowed values:
 curl --request POST --data '{"row":2,"column":4,"red":250,"green":68,"blue":199}' http://localhost:8000/cell
 ```
 
-Running this will change the color of the square in row 2 and column 4 to pink.
-![pink square in row 2 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/2.png " ")
+Running this will change the color of the cell in row 2 and column 4 to pink.
+![pink cell in row 2 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/2.png " ")
 
 Example with squares_test (only on localhost):
 ```
@@ -66,8 +66,8 @@ $YourDirectory/squares/squares_test cargo run <row> <column> <red> <green> <blue
 $YourDirectory/squares/squares_test cargo run 3 4 77 46 90
 ```
 
-Running this will change the color of the square in row 3 and column 4 to purple.
-![pink square in row 2 and column 4 and purple square in row 3 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/3.png " ")
+Running this will change the color of the cell in row 3 and column 4 to purple.
+![pink cell in row 2 and column 4 and purple cell in row 3 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/3.png " ")
 
 ### Protocol
 
@@ -81,6 +81,7 @@ Running this will change the color of the square in row 3 and column 4 to purple
 }
 ```
 
+
 ## How to draw lines
 
 To draw a line, send POST requests of the following format to hostname/line:
@@ -93,18 +94,18 @@ Allowed values:
 - colors: 0-255
 - row and column: 0 - your specified maximum - 1
 - direction: 1 for vertical, 0 for horizontal
-- length: Any length. If it is too long to fit, the part that does not fit into the window will not be drawn.
+- length: Any length. If it is too long to fit, the cells that are out of range will not be drawn.
 
 The row and column values mark the starting point of the line. The length is the length of the entire line.
 
 ### Example with curl
 
-In a 6 by 12 grid, this command adds a vertical purple line, starting in row 1 column 5, with a length of 5 pixels.
+In a 6 by 12 grid, this command adds a vertical purple line, starting in row 1 column 5, with a length of 5 cells.
 
 ```
 curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":120,"direction":1,"length":5}}' http://localhost:8000/line
 ```
-![vertical purple line, starting in row 1 column 5, with a length of 5 pixels](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/6.png " ")
+![vertical purple line, starting in row 1 column 5, with a length of 5 cells](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/6.png " ")
 
 To add a horizontal line, that starts in the same coordinate, with a different shade of purple, we run this command:
 
@@ -112,7 +113,7 @@ To add a horizontal line, that starts in the same coordinate, with a different s
 curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":90,"direction":0,"length":4}}' http://localhost:8000/line
 ```
 
-![horizontal purple line, starting in row 1 column 5, with a length of 4 pixels](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/7.png " ")
+![horizontal purple line, starting in row 1 column 5, with a length of 4 cells](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/7.png " ")
 
 ### Protocol
 
@@ -128,15 +129,16 @@ struct Line {
 }
 ```
 
-## How to draw several pixel at once
 
-To draw an 8x8 grid of pixels at once, by serializing the`struct ApiGrid` to a JSON object and sending it as a POST request to hostname/grid. You don't want to type this JSON object by hand.
+## How to color several cells at once
+
+To draw an 8x8 grid of pixels at once, serialize a `struct ApiGrid` to a JSON object and send it as a POST request to hostname/grid. You don't want to type this JSON object by hand.
 
 The struct has the following fields:
 
-- zero_row: the row value of the projected grid, were the 0 row of your 8x8 grid will be.
-- zero_column: the column value of the projected grid, were the 0 column of your 8x8 grid will be.
-- api_grid: an array of the following type [[RGB; 8]; 8].
+- zero_row: The row value of the projected grid, were the 0 row of your 8x8 grid will be.
+- zero_column: The column value of the projected grid, were the 0 column of your 8x8 grid will be.
+- api_grid: An array of the following type [[RGB; 8]; 8].
 
 ### Protocol
 
