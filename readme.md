@@ -105,7 +105,7 @@ In a 6 by 12 grid, this command adds a vertical purple line, starting in row 1 c
 ```
 curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":120,"direction":1,"length":5}}' http://localhost:8000/line
 ```
-![vertical purple line, starting in row 1 column 5, with a length of 5 cells](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/6.png " ")
+![vertical purple line, starting in row 1 column 5, with a length of 5 cells](https://github.com/ferrous-systems/Squares/blob/add-draw-lines/example%20images/6.png " ")
 
 To add a horizontal line, that starts in the same coordinate, with a different shade of purple, we run this command:
 
@@ -113,7 +113,7 @@ To add a horizontal line, that starts in the same coordinate, with a different s
 curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":90,"direction":0,"length":4}}' http://localhost:8000/line
 ```
 
-![horizontal purple line, starting in row 1 column 5, with a length of 4 cells](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/7.png " ")
+![horizontal purple line, starting in row 1 column 5, with a length of 4 cells](https://github.com/ferrous-systems/Squares/blob/add-draw-lines/example%20images/7.png " ")
 
 ### Protocol
 
