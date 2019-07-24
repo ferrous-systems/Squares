@@ -1,7 +1,7 @@
 ![purple square logo](https://github.com/ferrous-systems/Squares/blob/master/example%20images/logo.png " ")
 # Squares - coloring squares from http requests
 
-The program generates a grid in the size of your choice. There are several ways to color the cells of the grid: coloring single cells, lines of cells or 8x8 grids of squares. The program accepts JSON objects via POST requests. 
+The program generates a grid in the size of your choice. There are several ways to color the cells of the grid: coloring single cells, lines of cells or 8x8 grids of cells. The program accepts JSON objects via POST requests. 
 
 The easiest way to get JSON objects is to write a program that serialises the data
 structures found in the protocol section.
