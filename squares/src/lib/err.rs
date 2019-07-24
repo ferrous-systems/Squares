@@ -8,7 +8,6 @@ pub mod echain {
     error_chain! {}
 }
 
-
 pub fn is_cell_value_in_range(
     cell: &Cell,
     max_rows: &usize,
