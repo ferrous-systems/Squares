@@ -5,6 +5,9 @@ The program generates a grid in the size of your choice. The squares can be colo
 by sending JSON objects via POST requests containing the coordinates of the square
 in the grid as well as RGB values.
 
+The easiest way to get JSON objects is to write a program that serialises the data
+structures found in the protocol section.
+
 
 ## Download
   Get the zip file from [Ferrous Systems - Squares](https://github.com/ferrous-systems/Squares/archive/master.zip) or clone the repository from `git@github.com:ferrous-systems/Squares.git`.
@@ -46,7 +49,7 @@ Allowed values:
 - colors: 0-255
 - row and column: 0 - your specified maximum - 1
 
-Example with curl:
+### Example with curl:
 
 ```
 curl --request POST --data '{"row":2,"column":4,"red":250,"green":68,"blue":199}' http://localhost:8000/cell
@@ -62,8 +65,21 @@ $YourDirectory/squares/squares_test cargo run <row> <column> <red> <green> <blue
 ```
 $YourDirectory/squares/squares_test cargo run 3 4 77 46 90
 ```
+
 Running this will change the color of the square in row 3 and column 4 to purple.
 ![pink square in row 2 and column 4 and purple square in row 3 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/3.png " ")
+
+### Protocol
+
+```
+ struct Cell {
+    row: usize,
+    column: usize,
+    red: u8,
+    green: u8,
+    blue: u8,
+}
+```
 
 ## How to draw lines
 
@@ -77,10 +93,66 @@ Allowed values:
 - colors: 0-255
 - row and column: 0 - your specified maximum - 1
 - direction: 1 for vertical, 0 for horizontal
-- length:
+- length: Any length. If it is too long to fit, the part that does not fit into the window will not be drawn.
 
-The coordinates mark the starting point of the line. The length is the length of the entire line. The length of the line has to be inside 
+The row and column values mark the starting point of the line. The length is the length of the entire line.
 
+### Example with curl
+
+In a 6 by 12 grid, this command adds a vertical purple line, starting in row 1 column 5, with a length of 5 pixels.
+
+```
+curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":120,"direction":1,"length":5}}' http://localhost:8000/line
+```
+![vertical purple line, starting in row 1 column 5, with a length of 5 pixels](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/6.png " ")
+
+To add a horizontal line, that starts in the same coordinate, with a different shade of purple, we run this command:
+
+```
+curl --request POST --data '{"row":1,"column":5,"red":77,"green":0,"blue":90,"direction":0,"length":4}}' http://localhost:8000/line
+```
+
+![horizontal purple line, starting in row 1 column 5, with a length of 4 pixels](https://github.com/ferrous-systems/Squares/blob/fix-lines-and-readme/example%20images/7.png " ")
+
+### Protocol
+
+```
+struct Line {
+    row: i32,
+    column: i32,
+    red: u8,
+    green: u8,
+    blue: u8,
+    direction: i32,
+    length: i32,
+}
+```
+
+## How to draw several pixel at once
+
+To draw an 8x8 grid of pixels at once, by serializing the`struct ApiGrid` to a JSON object and sending it as a POST request to hostname/grid. You don't want to type this JSON object by hand.
+
+The struct has the following fields:
+
+- zero_row: the row value of the projected grid, were the 0 row of your 8x8 grid will be.
+- zero_column: the column value of the projected grid, were the 0 column of your 8x8 grid will be.
+- api_grid: an array of the following type [[RGB; 8]; 8].
+
+### Protocol
+
+```
+struct RGB {
+    red: u8,
+    green: u8,
+    blue: u8,
+}
+
+struct ApiGrid {
+    zero_row: i32,
+    zero_column: i32,
+    api_grid: [[RGB; 8]; 8],
+}
+```
 
 ## Intervention
 The program can be intervened by sending GET requests.
