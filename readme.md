@@ -37,14 +37,14 @@ produces a grid with 4 rows and 6 columns:
 - toggle pause: B
 
 
-## How to color squares:
-To color squares send POST requests of the following format to host:
+## How to color pixels:
+To color squares send POST requests of the following format to hostname/cell:
 ```
 {"row":<i32>,"column":<i32>,"red":<u8>,"green":<u8>,"blue":<u8>}
 ```
 Allowed values:
 - colors: 0-255
-- row and column: 1 - your specified maximum
+- row and column: 0 - your specified maximum - 1
 
 Example with curl:
 
@@ -65,6 +65,23 @@ $YourDirectory/squares/squares_test cargo run 3 4 77 46 90
 Running this will change the color of the square in row 3 and column 4 to purple.
 ![pink square in row 2 and column 4 and purple square in row 3 and column 4](https://github.com/ferrous-systems/Squares/blob/master/example%20images/3.png " ")
 
+## How to draw lines
+
+To draw a line, send POST requests of the following format to hostname/line:
+
+```
+{"row":<i32>,"column":<i32>,"red":<u8>,"green":<u8>,"blue":<u8>,"direction":<i32>,"length":<i32>}
+```
+
+Allowed values:
+- colors: 0-255
+- row and column: 0 - your specified maximum - 1
+- direction: 1 for vertical, 0 for horizontal
+- length:
+
+The coordinates mark the starting point of the line. The length is the length of the entire line. The length of the line has to be inside
+
+
 ## Intervention
 The program can be intervened by sending GET requests.
 
@@ -80,4 +97,3 @@ Sending a GET request containing `true` will pause the animation with a checker 
 
 
 This can be used to signal viewers that something else will happen on the screen, or to just reset the grid. Hitting `b` on the computer, the program is running on,  will pause the animation without clearing the screen. Hitting `return` will clear the screen without pausing the animation.  
-
